@@ -13,7 +13,7 @@ namespace PerformanceTests
         {
             // Move up to solution, then back down to test data as this method
             // can be called from other projects.
-            var filename = $"..\\..\\..\\PerformanceTests\\TestData\\{name}";
+            var filename = $"../../../PerformanceTests/TestData/{name}";
 
             // Decompress ZIP to same directory
             var archive = ZipFile.OpenRead(filename);
