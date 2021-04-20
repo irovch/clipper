@@ -21,7 +21,7 @@ namespace Clipper
             Y = point.Y;
         }
 
-        public DoublePoint(IntPoint point)
+        public DoublePoint(in IntPoint point)
         {
             X = point.X; Y = point.Y;
         }

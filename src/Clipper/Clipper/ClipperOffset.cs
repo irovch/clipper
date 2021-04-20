@@ -134,7 +134,7 @@ namespace Clipper
             }
         }
 
-        internal static DoublePoint GetUnitNormal(IntPoint pt1, IntPoint pt2)
+        internal static DoublePoint GetUnitNormal(in IntPoint pt1, in IntPoint pt2)
         {
             double dx = pt2.X - pt1.X;
             double dy = pt2.Y - pt1.Y;

@@ -56,7 +56,7 @@ namespace Clipper
 
         public bool IsClosed { get; set; } = true;
 
-        public Containment GeometricallyContains(IntPoint point)
+        public Containment GeometricallyContains(in IntPoint point)
         {
             return GeometryHelper.PolygonContainsPoint(this, point);
         }
@@ -133,7 +133,7 @@ namespace Clipper
             return simplified;
         }
 
-        public Polygon Translated(IntPoint offset)
+        public Polygon Translated(in IntPoint offset)
         {
             var translated = new Polygon(Count);
             for (var i = 0; i < Count; i++)

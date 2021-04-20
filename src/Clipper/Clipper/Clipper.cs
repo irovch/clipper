@@ -1053,7 +1053,7 @@ namespace Clipper
             return true;
         }
 
-        private void AddJoin(OutputPoint point1, OutputPoint point2, IntPoint offset)
+        private void AddJoin(OutputPoint point1, OutputPoint point2, in IntPoint offset)
         {
             var j = new Join
             {
@@ -1064,7 +1064,7 @@ namespace Clipper
             _joins.Add(j);
         }
 
-        private void AddGhostJoin(OutputPoint point, IntPoint offset)
+        private void AddGhostJoin(OutputPoint point, in IntPoint offset)
         {
             var j = new Join
             {
@@ -1610,7 +1610,7 @@ namespace Clipper
             }
         }
 
-        private void AddLocalMaxPoly(Edge edge1, Edge edge2, IntPoint point)
+        private void AddLocalMaxPoly(Edge edge1, Edge edge2, in IntPoint point)
         {
             AddOutputPoint(edge1, point);
 
@@ -1634,7 +1634,7 @@ namespace Clipper
             }
         }
 
-        private OutputPoint AddLocalMinPoly(Edge edge1, Edge edge2, IntPoint point)
+        private OutputPoint AddLocalMinPoly(Edge edge1, Edge edge2, in IntPoint point)
         {
             OutputPoint result;
             Edge edge, prev;
@@ -1679,7 +1679,7 @@ namespace Clipper
             return result;
         }
 
-        private OutputPoint AddOutputPoint(Edge edge, IntPoint point)
+        private OutputPoint AddOutputPoint(Edge edge, in IntPoint point)
         {
             if (edge.OutIndex < 0)
             {
@@ -2073,7 +2073,7 @@ namespace Clipper
 #if use_lines
         private void IntersectLines(
             Edge edge1, Edge edge2,
-            IntPoint point,
+            in IntPoint point,
             bool e1Contributing, bool e2Contributing)
         {
             // ignore subject-subject open path intersections UNLESS they
@@ -2166,7 +2166,7 @@ namespace Clipper
             }
         }
 
-        private void IntersectEdges(Edge edge1, Edge edge2, IntPoint point)
+        private void IntersectEdges(Edge edge1, Edge edge2, in IntPoint point)
         {
             // edge1 will be to the left of edge2 BELOW the intersection. Therefore edge1 is before
             // edge2 in AEL except when edge1 is being inserted at the intersection point ...
@@ -3266,7 +3266,7 @@ namespace Clipper
         private static bool JoinHorz(
             OutputPoint op1, OutputPoint op1B,
             OutputPoint op2, OutputPoint op2B,
-            IntPoint point, bool discardLeft)
+            in IntPoint point, bool discardLeft)
         {
             var dir1 = op1.Point.X > op1B.Point.X
                 ? EdgeDirection.RightToLeft
@@ -3619,7 +3619,7 @@ namespace Clipper
             return true;
         }
 
-        private static int PointInPolygon(IntPoint point, OutputPoint op)
+        private static int PointInPolygon(in IntPoint point, OutputPoint op)
         {
             // returns 0 if false, +1 if true, -1 if point ON polygon boundary
             var result = 0;

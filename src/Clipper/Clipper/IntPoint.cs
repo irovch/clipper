@@ -25,7 +25,7 @@ namespace Clipper
         {            
         }
 
-        public bool Equals(IntPoint other)
+        public bool Equals(in IntPoint other)
         {
             return this.X == other.X && this.Y == other.Y;
         }
@@ -45,53 +45,53 @@ namespace Clipper
             return $"({X}, {Y})";
         }
 
-        public static bool operator ==(IntPoint a, IntPoint b)
+        public static bool operator ==(in IntPoint a, in IntPoint b)
         {
             return a.X == b.X && a.Y == b.Y;
         }
 
-        public static bool operator !=(IntPoint a, IntPoint b)
+        public static bool operator !=(in IntPoint a, in IntPoint b)
         {
             return a.X != b.X || a.Y != b.Y;
         }
 
-        public static DoublePoint operator +(IntPoint a, IntPoint b)
+        public static DoublePoint operator +(in IntPoint a, in IntPoint b)
         {
             return new DoublePoint(a.X + b.X, a.Y + b.Y);
         }
 
-        public static IntPoint operator -(IntPoint a, IntPoint b)
+        public static IntPoint operator -(in IntPoint a, in IntPoint b)
         {
             return new IntPoint(a.X - b.X, a.Y - b.Y);
         }
 
-        public static IntPoint operator *(IntPoint a, IntPoint b)
+        public static IntPoint operator *(in IntPoint a, in IntPoint b)
         {
             return new IntPoint(a.X * b.X, a.Y * b.Y);
         }
 
-        public static IntPoint operator *(IntPoint a, long b)
+        public static IntPoint operator *(in IntPoint a, long b)
         {
             return new IntPoint(a.X * b, a.Y * b);
         }
 
-        public static IntPoint operator *(IntPoint a, double b)
+        public static IntPoint operator *(in IntPoint a, double b)
         {
             return new IntPoint(a.X * b, a.Y * b);
         }
 
-        public static IntPoint operator /(IntPoint a, IntPoint b)
+        public static IntPoint operator /(in IntPoint a, in IntPoint b)
         {
             return new IntPoint(a.X / b.X, a.Y / b.Y);
         }
 
-        public static IntPoint operator /(IntPoint a, long b)
+        public static IntPoint operator /(in IntPoint a, long b)
         {
             var scale = 1.0 / b;
             return a * scale;
         }
 
-        public static IntPoint operator /(IntPoint a, double b)
+        public static IntPoint operator /(in IntPoint a, double b)
         {
             var scale = 1.0 / b;
             return a * scale;
