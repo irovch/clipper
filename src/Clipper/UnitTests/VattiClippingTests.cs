@@ -3662,8 +3662,8 @@ namespace UnitTests
 
             var polygon = solution[0];
             Assert.AreEqual(2, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+3.0681818 * Scale, +3.6818182 * Scale) - new IntPoint(polygon[0])).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+2.5 * Scale, +3.0 * Scale) - new IntPoint(polygon[1])).Length));
+            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+3.0681818 * Scale, +3.6818182 * Scale) - polygon[0]).Length));
+            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+2.5 * Scale, +3.0 * Scale) - polygon[1]).Length));
         }
 
         [TestMethod]

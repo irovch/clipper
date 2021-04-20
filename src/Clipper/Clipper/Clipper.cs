@@ -1749,13 +1749,6 @@ namespace Clipper
             return edge.Side == EdgeSide.Left ? outputPolygon.Points : outputPolygon.Points.Prev;
         }
 
-        internal void SwapPoints(ref IntPoint point1, ref IntPoint point2)
-        {
-            var tmp = new IntPoint(point1);
-            point1 = point2;
-            point2 = tmp;
-        }
-
         private static bool HorzSegmentsOverlap(long seg1A, long seg1B, long seg2A, long seg2B)
         {
             if (seg1A > seg1B) GeometryHelper.Swap(ref seg1A, ref seg1B);
@@ -2697,7 +2690,7 @@ namespace Clipper
             {
                 edge.PrevInSel = edge.PrevInAel;
                 edge.NextInSel = edge.NextInAel;
-                edge.Current.X = TopX(edge, topY);
+                edge.Current = new IntPoint(TopX(edge, topY), edge.Current.Y);
                 edge = edge.NextInAel;
             }
 
@@ -2816,8 +2809,7 @@ namespace Clipper
             // return false but for the edge.Dx value be equal due to double precision rounding.
             if (GeometryHelper.NearZero(edge1.Dx - edge2.Dx))
             {
-                point.Y = edge1.Current.Y;
-                point.X = TopX(edge1, point.Y);
+                point = new IntPoint(TopX(edge1, point.Y), edge1.Current.Y);
                 return;
             }
 
@@ -2826,28 +2818,26 @@ namespace Clipper
 
             if (edge1.Delta.X == 0)
             {
-                point.X = edge1.Bottom.X;
                 if (edge2.IsHorizontal)
                 {
-                    point.Y = edge2.Bottom.Y;
+                    point = new IntPoint(edge1.Bottom.X, edge2.Bottom.Y);
                 }
                 else
                 {
                     b2 = edge2.Bottom.Y - edge2.Bottom.X / edge2.Dx;
-                    point.Y = (point.X / edge2.Dx + b2).RoundToLong();
+                    point = new IntPoint(edge1.Bottom.X, (edge1.Bottom.X / edge2.Dx + b2).RoundToLong());
                 }
             }
             else if (edge2.Delta.X == 0)
             {
-                point.X = edge2.Bottom.X;
                 if (edge1.IsHorizontal)
                 {
-                    point.Y = edge1.Bottom.Y;
+                    point = new IntPoint(edge2.Bottom.X, edge1.Bottom.Y);
                 }
                 else
                 {
-                    b1 = edge1.Bottom.Y - (edge1.Bottom.X / edge1.Dx);
-                    point.Y = (point.X / edge1.Dx + b1).RoundToLong();
+                    b1 = edge1.Bottom.Y - edge1.Bottom.X / edge1.Dx;
+                    point = new IntPoint(edge2.Bottom.X, (edge2.Bottom.X / edge1.Dx + b1).RoundToLong());
                 }
             }
             else
@@ -2855,25 +2845,27 @@ namespace Clipper
                 b1 = edge1.Bottom.X - edge1.Bottom.Y * edge1.Dx;
                 b2 = edge2.Bottom.X - edge2.Bottom.Y * edge2.Dx;
                 var q = (b2 - b1) / (edge1.Dx - edge2.Dx);
-                point.Y = q.RoundToLong();
-                point.X = Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx)
-                    ? (edge1.Dx * q + b1).RoundToLong()
-                    : (edge2.Dx * q + b2).RoundToLong();
+                point = new IntPoint(
+                    Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx)
+                        ? (edge1.Dx * q + b1).RoundToLong()
+                        : (edge2.Dx * q + b2).RoundToLong(),
+                    q.RoundToLong());
             }
 
             if (point.Y < edge1.Top.Y || point.Y < edge2.Top.Y)
             {
-                point.Y = edge1.Top.Y > edge2.Top.Y ? edge1.Top.Y : edge2.Top.Y;
-                point.X = TopX(Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx) ? edge1 : edge2, point.Y);
+                point = new IntPoint(
+                    TopX(Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx) ? edge1 : edge2, point.Y),
+                    edge1.Top.Y > edge2.Top.Y ? edge1.Top.Y : edge2.Top.Y);
             }
 
             //finally, don't allow 'point' to be BELOW curr.Y (ie bottom of scanbeam) ...
             if (point.Y <= edge1.Current.Y) return;
 
-            point.Y = edge1.Current.Y;
-
             //better to use the more vertical edge to derive X ...
-            point.X = TopX(Math.Abs(edge1.Dx) > Math.Abs(edge2.Dx) ? edge2 : edge1, point.Y);
+            point = new IntPoint(
+                TopX(Math.Abs(edge1.Dx) > Math.Abs(edge2.Dx) ? edge2 : edge1, edge1.Current.Y),
+                edge1.Current.Y);
         }
 
         private void ProcessEdgesAtTopOfScanbeam(long topY)
@@ -2916,8 +2908,7 @@ namespace Clipper
                     }
                     else
                     {
-                        edge.Current.X = TopX(edge, topY);
-                        edge.Current.Y = topY;
+                        edge.Current = new IntPoint(TopX(edge, topY), topY);
                     }
 
                     // When SimplifySolution and 'edge' is being touched by another edge, then
@@ -2932,7 +2923,7 @@ namespace Clipper
                             prevInAel.Current.X == edge.Current.X &&
                             prevInAel.WindDelta != 0)
                         {
-                            var point = new IntPoint(edge.Current);
+                            var point = edge.Current;
                             var outputPoint1 = AddOutputPoint(prevInAel, point);
                             var outputPoint2 = AddOutputPoint(edge, point);
                             AddJoin(outputPoint1, outputPoint2, point); // SimplifySolution (type-3) join

@@ -68,8 +68,7 @@ namespace Clipper
 
         internal void SetDx()
         {
-            Delta.X = Top.X - Bottom.X;
-            Delta.Y = Top.Y - Bottom.Y;
+            this.Delta = new IntPoint(Top.X - Bottom.X, Top.Y - Bottom.Y);
 
             IsHorizontal = Delta.Y == 0;
 
@@ -83,7 +82,11 @@ namespace Clipper
             // swap horizontal edges' top and bottom x's so they follow the natural
             // progression of the bounds - ie so their xbots will align with the
             // adjoining lower edge. [Helpful in the ProcessHorizontal() method.]
-            GeometryHelper.Swap(ref Top.X, ref Bottom.X);
+            
+            // GeometryHelper.Swap(ref Top.X, ref Bottom.X);
+            var tmp = this.Top.X;
+            this.Top = new IntPoint(this.Bottom.X, this.Top.Y);
+            this.Bottom = new IntPoint(tmp, this.Bottom.Y);
         }
 
         public override string ToString()

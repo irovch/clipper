@@ -12,7 +12,8 @@ namespace Clipper
         private double _delta, _sinA, _sin, _cos;
         private double _miterLim, _stepsPerRad;
 
-        private IntPoint _lowest;
+        private int _lowestX;
+        private int _lowestY;
         private readonly PolygonNode _polygonNodes = new PolygonNode();
 
         public double ArcTolerance { get; set; }
@@ -25,13 +26,13 @@ namespace Clipper
         {
             MiterLimit = miterLimit;
             ArcTolerance = arcTolerance;
-            _lowest.X = -1;
+            _lowestX = -1;
         }
 
         public void Clear()
         {
             _polygonNodes.Children.Clear();
-            _lowest.X = -1;
+            _lowestX = -1;
         }
 
         public void AddPath(Polygon path, JoinType joinType, EndType endType)
@@ -76,19 +77,21 @@ namespace Clipper
             //if this path's lowest point is lower than all the others then update _lowest
             if (endType != EndType.ClosedPolygon) return;
 
-            if (_lowest.X < 0)
+            if (_lowestX < 0)
             {
-                _lowest = new IntPoint(_polygonNodes.Children.Count - 1, k);
+                _lowestX = _polygonNodes.Children.Count - 1;
+                _lowestY = k;
             }
             else
             {
-                var ip = _polygonNodes.Children[(int)_lowest.X].Polygon[(int)_lowest.Y];
+                var ip = _polygonNodes.Children[_lowestX].Polygon[_lowestY];
 
                 if (newNode.Polygon[k].Y > ip.Y ||
                     newNode.Polygon[k].Y == ip.Y &&
                     newNode.Polygon[k].X < ip.X)
                 {
-                    _lowest = new IntPoint(_polygonNodes.Children.Count - 1, k);
+                    _lowestX = _polygonNodes.Children.Count - 1;
+                    _lowestY = k;
                 }
             }
         }
@@ -105,8 +108,8 @@ namespace Clipper
         {
             // fixup orientations of all closed paths if the orientation of the
             // closed path with the lowermost vertex is wrong ...
-            if (_lowest.X >= 0 &&
-                _polygonNodes.Children[(int)_lowest.X].Polygon.Orientation == PolygonOrientation.Clockwise)
+            if (_lowestX >= 0 &&
+                _polygonNodes.Children[_lowestX].Polygon.Orientation == PolygonOrientation.Clockwise)
             {
                 foreach (var node in _polygonNodes.Children)
                 {

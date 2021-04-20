@@ -2,10 +2,10 @@ using System;
 
 namespace Clipper
 {
-    public struct IntPoint
+    public readonly struct IntPoint
     {
-        public long X;
-        public long Y;
+        public readonly long X;
+        public readonly long Y;
 
         public double Length => Math.Sqrt(X * X + Y * Y);
 
@@ -21,33 +21,23 @@ namespace Clipper
             Y = (long)y;
         }
 
-        public IntPoint(IntPoint pt)
-        {
-            X = pt.X;
-            Y = pt.Y;
-        }
-
         public IntPoint(DoublePoint point) : this(point.X, point.Y)
         {            
         }
 
         public bool Equals(IntPoint other)
         {
-            return X == other.X && Y == other.Y;
+            return this.X == other.X && this.Y == other.Y;
         }
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is IntPoint && Equals((IntPoint)obj);
+            return obj is IntPoint point && this.Equals(point);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return (X.GetHashCode() * 397) ^ Y.GetHashCode();
-            }
+            return HashCode.Combine(this.X, this.Y);
         }
 
         public override string ToString()
@@ -62,7 +52,7 @@ namespace Clipper
 
         public static bool operator !=(IntPoint a, IntPoint b)
         {
-            return !(a == b);
+            return a.X != b.X || a.Y != b.Y;
         }
 
         public static DoublePoint operator +(IntPoint a, IntPoint b)
