@@ -1,3 +1,6 @@
+using System;
+using System.Runtime.CompilerServices;
+
 namespace Clipper
 {
     /// <summary>
@@ -7,71 +10,45 @@ namespace Clipper
     ///    Int128 val3 = val1 * val2;
     ///    val3.ToString => "85070591730234615847396907784232501249" (8.5e+37)
     /// </summary>
-    public struct Int128
+    public readonly struct Int128
     {
-        private long _hi;
-        private ulong _lo;
+        private readonly long _hi;
+        private readonly ulong _lo;
 
-        public Int128(long lo)
-        {
-            _lo = (ulong)lo;
-            if (lo < 0) _hi = -1;
-            else _hi = 0;
-        }
-
-        public Int128(long hi, ulong lo)
+        public Int128(in long hi, in ulong lo)
         {
             _lo = lo;
             _hi = hi;
         }
 
-        public Int128(Int128 val)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(in Int128 val1, in Int128 val2)
         {
-            _hi = val._hi;
-            _lo = val._lo;
+            return val1._hi == val2._hi && val1._lo == val2._lo;
         }
 
-        public bool IsNegative()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(in Int128 val1, in Int128 val2)
         {
-            return _hi < 0;
-        }
-
-        public static bool operator ==(Int128 val1, Int128 val2)
-        {
-            if ((object)val1 == (object)val2) return true;
-            return (val1._hi == val2._hi && val1._lo == val2._lo);
-        }
-
-        public static bool operator !=(Int128 val1, Int128 val2)
-        {
-            return !(val1 == val2);
+            return val1._hi != val2._hi || val1._lo != val2._lo;
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Int128))
-            {
-                return false;
-            }
-
-            var i128 = (Int128)obj;
-            return (i128._hi == _hi && i128._lo == _lo);
+            return obj is Int128 i128 && i128._hi == this._hi && i128._lo == this._lo;
         }
 
-        public bool Equals(Int128 other)
+        public bool Equals(in Int128 other)
         {
-            return _hi == other._hi && _lo == other._lo;
+            return this._hi == other._hi && this._lo == other._lo;
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return (_hi.GetHashCode() * 397) ^ _lo.GetHashCode();
-            }
+            return HashCode.Combine(this._hi, this._lo);
         }
 
-        public static bool operator >(Int128 val1, Int128 val2)
+        public static bool operator >(in Int128 val1, in Int128 val2)
         {
             if (val1._hi != val2._hi)
             {
@@ -81,7 +58,7 @@ namespace Clipper
             return val1._lo > val2._lo;
         }
 
-        public static bool operator <(Int128 val1, Int128 val2)
+        public static bool operator <(in Int128 val1, in Int128 val2)
         {
             if (val1._hi != val2._hi)
             {
@@ -91,27 +68,31 @@ namespace Clipper
             return val1._lo < val2._lo;
         }
 
-        public static Int128 operator +(Int128 lhs, Int128 rhs)
+        public static Int128 operator +(in Int128 lhs, in Int128 rhs)
         {
-            lhs._hi += rhs._hi;
-            lhs._lo += rhs._lo;
-            if (lhs._lo < rhs._lo) lhs._hi++;
-            return lhs;
+            var hi = lhs._hi + rhs._hi;
+            var lo = lhs._lo + rhs._lo;
+            if (lo < rhs._lo)
+            {
+                hi++;
+            }
+
+            return new Int128(hi, lo);
         }
 
-        public static Int128 operator -(Int128 lhs, Int128 rhs)
+        public static Int128 operator -(in Int128 lhs, in Int128 rhs)
         {
             return lhs + -rhs;
         }
 
-        public static Int128 operator -(Int128 val)
+        public static Int128 operator -(in Int128 val)
         {
             return val._lo == 0
                 ? new Int128(-val._hi, 0)
                 : new Int128(~val._hi, ~val._lo + 1);
         }
 
-        public static explicit operator double(Int128 val)
+        public static explicit operator double(in Int128 val)
         {
             const double shift64 = 18446744073709551616.0; // 2^64
 
