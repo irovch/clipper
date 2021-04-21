@@ -1,3 +1,5 @@
+using Clipper.Custom;
+
 namespace Clipper
 {
     public class Edge
@@ -5,22 +7,22 @@ namespace Clipper
         /// <summary>
         /// The edge most bottom point.
         /// </summary>
-        public IntPoint Bottom;
+        public PointL Bottom;
 
         /// <summary>
         /// The edge top point.
         /// </summary>
-        public IntPoint Top;
+        public PointL Top;
 
         /// <summary>
         /// Delta between top and bottom points.
         /// </summary>
-        public IntPoint Delta;
+        public PointL Delta;
 
         /// <summary>
         /// The current working point for the edge, updated for each scanbeam.
         /// </summary>
-        internal IntPoint Current;
+        internal PointL Current;
 
         internal double Dx;
         internal PolygonKind Kind;
@@ -68,7 +70,7 @@ namespace Clipper
 
         internal void SetDx()
         {
-            this.Delta = new IntPoint(Top.X - Bottom.X, Top.Y - Bottom.Y);
+            this.Delta = new PointL(Top.X - Bottom.X, Top.Y - Bottom.Y);
 
             IsHorizontal = Delta.Y == 0;
 
@@ -85,8 +87,8 @@ namespace Clipper
             
             // GeometryHelper.Swap(ref Top.X, ref Bottom.X);
             var tmp = this.Top.X;
-            this.Top = new IntPoint(this.Bottom.X, this.Top.Y);
-            this.Bottom = new IntPoint(tmp, this.Bottom.Y);
+            this.Top = new PointL(this.Bottom.X, this.Top.Y);
+            this.Bottom = new PointL(tmp, this.Bottom.Y);
         }
 
         public override string ToString()

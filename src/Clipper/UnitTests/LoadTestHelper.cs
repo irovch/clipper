@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Clipper;
+using Clipper.Custom;
 
 namespace UnitTests
 {
@@ -167,7 +168,7 @@ namespace UnitTests
                 var x = int.Parse(match.Groups[1].Value.Replace(" ", ""));
                 var y = int.Parse(match.Groups[2].Value.Replace(" ", ""));
 
-                polygon.Add(new IntPoint(x, y));
+                polygon.Add(new PointL(x, y));
 
                 // Skip past match
                 line = line.Substring(match.Length);

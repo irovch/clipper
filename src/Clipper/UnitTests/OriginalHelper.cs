@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Clipper;
+using Clipper.Custom;
 
 namespace UnitTests
 {
@@ -19,7 +20,7 @@ namespace UnitTests
         public static PolygonPath ToNew(this List<List<ClipperLib.IntPoint>> path)
         {
             return new PolygonPath(path.Select(poly => 
-                new Polygon(poly.Select(point => new IntPoint(point.X, point.Y)))));
+                new Polygon(poly.Select(point => new PointL(point.X, point.Y)))));
         }
     }
 }

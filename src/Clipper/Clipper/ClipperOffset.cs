@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Clipper.Custom;
 
 namespace Clipper
 {
@@ -134,7 +135,7 @@ namespace Clipper
             }
         }
 
-        internal static DoublePoint GetUnitNormal(in IntPoint pt1, in IntPoint pt2)
+        internal static DoublePoint GetUnitNormal(in PointL pt1, in PointL pt2)
         {
             double dx = pt2.X - pt1.X;
             double dy = pt2.Y - pt1.Y;
@@ -226,7 +227,7 @@ namespace Clipper
                         var Y = 0.0;
                         for (var j = 1; j <= steps; j++)
                         {
-                            _destinationPolygon.Add(new IntPoint(
+                            _destinationPolygon.Add(new PointL(
                                 (_sourcePolygon[0].X + x * delta).RoundToLong(),
                                 (_sourcePolygon[0].Y + Y * delta).RoundToLong()));
                             var x2 = x;
@@ -241,7 +242,7 @@ namespace Clipper
 
                         for (var j = 0; j < 4; ++j)
                         {
-                            _destinationPolygon.Add(new IntPoint(
+                            _destinationPolygon.Add(new PointL(
                                 (_sourcePolygon[0].X + x * delta).RoundToLong(),
                                 (_sourcePolygon[0].Y + Y * delta).RoundToLong()));
 
@@ -297,17 +298,17 @@ namespace Clipper
                         OffsetPoint(j, ref k, node.JoinType);
                     }
 
-                    IntPoint pt1;
+                    PointL pt1;
                     if (node.EndType == EndType.OpenButt)
                     {
                         var j = len - 1;
-                        pt1 = new IntPoint(
+                        pt1 = new PointL(
                             (_sourcePolygon[j].X + _normals[j].X * delta).RoundToLong(),
                             (_sourcePolygon[j].Y + _normals[j].Y * delta).RoundToLong());
 
                         _destinationPolygon.Add(pt1);
 
-                        pt1 = new IntPoint(
+                        pt1 = new PointL(
                             (_sourcePolygon[j].X - _normals[j].X * delta).RoundToLong(),
                             (_sourcePolygon[j].Y - _normals[j].Y * delta).RoundToLong());
 
@@ -341,13 +342,13 @@ namespace Clipper
 
                     if (node.EndType == EndType.OpenButt)
                     {
-                        pt1 = new IntPoint(
+                        pt1 = new PointL(
                             (_sourcePolygon[0].X - _normals[0].X * delta).RoundToLong(),
                             (_sourcePolygon[0].Y - _normals[0].Y * delta).RoundToLong());
 
                         _destinationPolygon.Add(pt1);
 
-                        pt1 = new IntPoint(
+                        pt1 = new PointL(
                             (_sourcePolygon[0].X + _normals[0].X * delta).RoundToLong(),
                             (_sourcePolygon[0].Y + _normals[0].Y * delta).RoundToLong());
 
@@ -393,10 +394,10 @@ namespace Clipper
                 var r = Clipper.GetBounds(_destinationPolygons);
                 var outer = new Polygon
                 {
-                    new IntPoint(r.Left - 10, r.Bottom + 10),
-                    new IntPoint(r.Right + 10, r.Bottom + 10),
-                    new IntPoint(r.Right + 10, r.Top - 10),
-                    new IntPoint(r.Left - 10, r.Top - 10)
+                    new PointL(r.Left - 10, r.Bottom + 10),
+                    new PointL(r.Right + 10, r.Bottom + 10),
+                    new PointL(r.Right + 10, r.Top - 10),
+                    new PointL(r.Left - 10, r.Top - 10)
                 };
 
                 clipper.ReverseOrientation = true;
@@ -441,10 +442,10 @@ namespace Clipper
                 var r = Clipper.GetBounds(_destinationPolygons);
                 var outer = new Polygon
                 {
-                    new IntPoint(r.Left - 10, r.Bottom + 10),
-                    new IntPoint(r.Right + 10, r.Bottom + 10),
-                    new IntPoint(r.Right + 10, r.Top - 10),
-                    new IntPoint(r.Left - 10, r.Top - 10)
+                    new PointL(r.Left - 10, r.Bottom + 10),
+                    new PointL(r.Right + 10, r.Bottom + 10),
+                    new PointL(r.Right + 10, r.Top - 10),
+                    new PointL(r.Left - 10, r.Top - 10)
                 };
 
                 clipper.ReverseOrientation = true;
@@ -489,7 +490,7 @@ namespace Clipper
 
                 if (cosA > 0) // angle ==> 0 degrees
                 {
-                    _destinationPolygon.Add(new IntPoint(
+                    _destinationPolygon.Add(new PointL(
                         (_sourcePolygon[j].X + _normals[k].X * _delta).RoundToLong(),
                         (_sourcePolygon[j].Y + _normals[k].Y * _delta).RoundToLong()));
                     return;
@@ -501,13 +502,13 @@ namespace Clipper
 
             if (_sinA * _delta < 0)
             {
-                _destinationPolygon.Add(new IntPoint(
+                _destinationPolygon.Add(new PointL(
                     (_sourcePolygon[j].X + _normals[k].X * _delta).RoundToLong(),
                     (_sourcePolygon[j].Y + _normals[k].Y * _delta).RoundToLong()));
 
                 _destinationPolygon.Add(_sourcePolygon[j]);
 
-                _destinationPolygon.Add(new IntPoint(
+                _destinationPolygon.Add(new PointL(
                     (_sourcePolygon[j].X + _normals[j].X * _delta).RoundToLong(),
                     (_sourcePolygon[j].Y + _normals[j].Y * _delta).RoundToLong()));
             }
@@ -537,11 +538,11 @@ namespace Clipper
         {
             var dx = Math.Tan(Math.Atan2(_sinA, _normals[k].X * _normals[j].X + _normals[k].Y * _normals[j].Y) / 4);
 
-            _destinationPolygon.Add(new IntPoint(
+            _destinationPolygon.Add(new PointL(
                 (_sourcePolygon[j].X + _delta * (_normals[k].X - _normals[k].Y * dx)).RoundToLong(),
                 (_sourcePolygon[j].Y + _delta * (_normals[k].Y + _normals[k].X * dx)).RoundToLong()));
 
-            _destinationPolygon.Add(new IntPoint(
+            _destinationPolygon.Add(new PointL(
                 (_sourcePolygon[j].X + _delta * (_normals[j].X + _normals[j].Y * dx)).RoundToLong(),
                 (_sourcePolygon[j].Y + _delta * (_normals[j].Y - _normals[j].X * dx)).RoundToLong()));
         }
@@ -549,7 +550,7 @@ namespace Clipper
         internal void DoMiter(int j, int k, double r)
         {
             var q = _delta / r;
-            _destinationPolygon.Add(new IntPoint(
+            _destinationPolygon.Add(new PointL(
                 (_sourcePolygon[j].X + (_normals[k].X + _normals[j].X) * q).RoundToLong(),
                 (_sourcePolygon[j].Y + (_normals[k].Y + _normals[j].Y) * q).RoundToLong()));
         }
@@ -564,7 +565,7 @@ namespace Clipper
 
             for (var i = 0; i < steps; ++i)
             {
-                _destinationPolygon.Add(new IntPoint(
+                _destinationPolygon.Add(new PointL(
                     (_sourcePolygon[j].X + x * _delta).RoundToLong(),
                     (_sourcePolygon[j].Y + y * _delta).RoundToLong()));
 
@@ -573,7 +574,7 @@ namespace Clipper
                 y = x2 * _sin + y * _cos;
             }
 
-            _destinationPolygon.Add(new IntPoint(
+            _destinationPolygon.Add(new PointL(
                 (_sourcePolygon[j].X + _normals[j].X * _delta).RoundToLong(),
                 (_sourcePolygon[j].Y + _normals[j].Y * _delta).RoundToLong()));
         }

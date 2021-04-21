@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Clipper.Custom;
 
 namespace Clipper
 {
@@ -17,7 +18,7 @@ namespace Clipper
                 {
                     var polygon = new Polygon(patternCount);
                     polygon.AddRange(
-                        pattern.Select(p => new IntPoint(path[i].X + p.X, path[i].Y + p.Y)));
+                        pattern.Select(p => new PointL(path[i].X + p.X, path[i].Y + p.Y)));
                     solution.Add(polygon);
                 }
             }
@@ -26,7 +27,7 @@ namespace Clipper
                 for (var i = 0; i < pathCount; i++)
                 {
                     var polygon = new Polygon(patternCount);
-                    polygon.AddRange(pattern.Select(p => new IntPoint(path[i].X - p.X, path[i].Y - p.Y)));
+                    polygon.AddRange(pattern.Select(p => new PointL(path[i].X - p.X, path[i].Y - p.Y)));
                     solution.Add(polygon);
                 }
             }

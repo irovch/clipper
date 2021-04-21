@@ -1,9 +1,11 @@
+using Clipper.Custom;
+
 namespace Clipper
 {
     public class OutputPoint
     {
         public int Index;
-        public IntPoint Point;
+        public PointL Point;
         public OutputPoint Next;
         public OutputPoint Prev;
 

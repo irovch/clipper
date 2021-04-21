@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Clipper.Custom;
 
 namespace Clipper
 {
-    public class Polygon : List<IntPoint>
+    public class Polygon : List<PointL>
     {
         public PolygonOrientation Orientation
         {
@@ -25,9 +26,14 @@ namespace Clipper
         }
 
         public Polygon() { }
-
-        public Polygon(IEnumerable<IntPoint> points) : base(points)
+        
+        public Polygon(IEnumerable<PointL> points) : base(points)
         {
+        }
+        
+        public Polygon(int capacity, IEnumerable<PointL> points) : base(capacity)
+        {
+            this.AddRange(points);
         }
 
         public Polygon(int capacity) : base(capacity) { }
@@ -56,7 +62,7 @@ namespace Clipper
 
         public bool IsClosed { get; set; } = true;
 
-        public Containment GeometricallyContains(in IntPoint point)
+        public Containment GeometricallyContains(in PointL point)
         {
             return GeometryHelper.PolygonContainsPoint(this, point);
         }
@@ -133,12 +139,12 @@ namespace Clipper
             return simplified;
         }
 
-        public Polygon Translated(in IntPoint offset)
+        public Polygon Translated(in PointL offset)
         {
             var translated = new Polygon(Count);
             for (var i = 0; i < Count; i++)
             {
-                translated.Add(new IntPoint(this[i].X + offset.X, this[i].Y + offset.Y));
+                translated.Add(new PointL(this[i].X + offset.X, this[i].Y + offset.Y));
             }
             return translated;
         }

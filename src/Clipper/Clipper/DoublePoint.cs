@@ -1,4 +1,5 @@
 using System;
+using Clipper.Custom;
 
 namespace Clipper
 {
@@ -21,7 +22,7 @@ namespace Clipper
             Y = point.Y;
         }
 
-        public DoublePoint(in IntPoint point)
+        public DoublePoint(in PointL point)
         {
             X = point.X; Y = point.Y;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Clipper.Custom;
 
 namespace Clipper
 {
@@ -17,7 +18,7 @@ namespace Clipper
         /// <summary>
         /// Calulate the signed area given 3 points.
         /// </summary>
-        public static long Area(in IntPoint a, in IntPoint b, in IntPoint c)
+        public static long Area(in PointL a, in PointL b, in PointL c)
         {
             return (c.X - b.X) * (a.Y - b.Y) - (a.X - b.X) * (c.Y - b.Y);
         }
@@ -44,7 +45,7 @@ namespace Clipper
         /// Computational Geometry (CG) 2nd Edition - Joseph O'Rourke
         /// Code 7.13 pg 244.
         /// </summary>
-        public static Containment PolygonContainsPoint(IList<IntPoint> points, in IntPoint point)
+        public static Containment PolygonContainsPoint(IList<PointL> points, in PointL point)
         {
             var rCross = 0;
             var lCross = 0;
@@ -143,9 +144,9 @@ namespace Clipper
         /// <param name="useFullRange">Set to true to use large numbers (Int128) for caclulations.</param>
         /// <returns></returns>
         internal static bool PointOnLineSegment(
-            in IntPoint point,
-            in IntPoint linePoint1,
-            in IntPoint linePoint2,
+            in PointL point,
+            in PointL linePoint1,
+            in PointL linePoint2,
             bool useFullRange)
         {
             if (useFullRange)
@@ -168,7 +169,7 @@ namespace Clipper
         /// <summary>
         /// Determines if the point is one of the vertices of the output polygon.
         /// </summary>
-        internal static bool PointIsVertex(in IntPoint point, OutputPoint polygon)
+        internal static bool PointIsVertex(in PointL point, OutputPoint polygon)
         {
             var polygonPoint = polygon;
             do
@@ -184,7 +185,7 @@ namespace Clipper
         /// <summary>
         /// Determines if the point lies on the polygon boundary.
         /// </summary>
-        internal static bool PointOnPolygon(in IntPoint point, OutputPoint polygon, bool useFullRange)
+        internal static bool PointOnPolygon(in PointL point, OutputPoint polygon, bool useFullRange)
         {
             var polygonPoint = polygon;
             while (true)
@@ -216,9 +217,9 @@ namespace Clipper
         /// Determines if the joined (at point2) line segments slopes are equal. 
         /// </summary>
         internal static bool SlopesEqual(
-            in IntPoint point1,
-            in IntPoint point2,
-            in IntPoint point3,
+            in PointL point1,
+            in PointL point2,
+            in PointL point3,
             bool useFullRange)
         {
             if (useFullRange)
@@ -232,10 +233,10 @@ namespace Clipper
         /// Determines if the line segment slopes are equal. 
         /// </summary>
         internal static bool SlopesEqual(
-            in IntPoint point1,
-            in IntPoint point2,
-            in IntPoint point3,
-            in IntPoint point4,
+            in PointL point1,
+            in PointL point2,
+            in PointL point3,
+            in PointL point4,
             bool useFullRange)
         {
             if (useFullRange)
@@ -249,7 +250,7 @@ namespace Clipper
         /// full range math (Int128) should be used to accommodate 
         /// the point value range.
         /// </summary>
-        internal static void RangeTest(in IntPoint point, ref bool useFullRange)
+        internal static void RangeTest(in PointL point, ref bool useFullRange)
         {
             while (true)
             {
@@ -277,7 +278,7 @@ namespace Clipper
             return value < 0 ? (long)(value - 0.5) : (long)(value + 0.5);
         }
 
-        internal static double DistanceFromLineSqrd(in IntPoint point, in IntPoint linePoint1, in IntPoint linePoint2)
+        internal static double DistanceFromLineSqrd(in PointL point, in PointL linePoint1, in PointL linePoint2)
         {
             //The equation of a line in general form (Ax + By + C = 0)
             //given 2 points (x¹,y¹) & (x²,y²) is ...
@@ -293,9 +294,9 @@ namespace Clipper
         }
 
         internal static bool SlopesNearCollinear(
-            in IntPoint point1,
-            in IntPoint point2,
-            in IntPoint point3,
+            in PointL point1,
+            in PointL point2,
+            in PointL point3,
             double distanceSquared)
         {
             // this function is more accurate when the point that's GEOMETRICALLY 
@@ -323,14 +324,14 @@ namespace Clipper
                 : DistanceFromLineSqrd(point3, point1, point2) < distanceSquared;
         }
 
-        internal static bool PointsAreClose(in IntPoint point1, in IntPoint point2, double distSqrd)
+        internal static bool PointsAreClose(in PointL point1, in PointL point2, double distSqrd)
         {
             var dx = (double)point1.X - point2.X;
             var dy = (double)point1.Y - point2.Y;
             return dx * dx + dy * dy <= distSqrd;
         }
 
-        internal static bool Pt2IsBetweenPt1AndPt3(in IntPoint point1, in IntPoint point2, in IntPoint point3)
+        internal static bool Pt2IsBetweenPt1AndPt3(in PointL point1, in PointL point2, in PointL point3)
         {
             if (point1 == point3 || point1 == point2 || point3 == point2)
             {
@@ -345,14 +346,14 @@ namespace Clipper
             return point2.Y > point1.Y == point2.Y < point3.Y;
         }
 
-        public static double GetDx(in IntPoint point1, in IntPoint point2)
+        public static double GetDx(in PointL point1, in PointL point2)
         {
             return point1.Y == point2.Y
                 ? GetDxSignedLength(point1, point2)
                 : (double)(point2.X - point1.X) / (point2.Y - point1.Y);
         }
 
-        public static double GetDxSignedLength(in IntPoint point1, in IntPoint point2)
+        public static double GetDxSignedLength(in PointL point1, in PointL point2)
         {
             // The dx field for a horizontal edge is simply the signed
             // length of the edge with the value of dx negative if the edge 

@@ -47,6 +47,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Clipper.Custom;
 
 namespace Clipper
 {
@@ -1053,7 +1054,7 @@ namespace Clipper
             return true;
         }
 
-        private void AddJoin(OutputPoint point1, OutputPoint point2, in IntPoint offset)
+        private void AddJoin(OutputPoint point1, OutputPoint point2, in PointL offset)
         {
             var j = new Join
             {
@@ -1064,7 +1065,7 @@ namespace Clipper
             _joins.Add(j);
         }
 
-        private void AddGhostJoin(OutputPoint point, in IntPoint offset)
+        private void AddGhostJoin(OutputPoint point, in PointL offset)
         {
             var j = new Join
             {
@@ -1610,7 +1611,7 @@ namespace Clipper
             }
         }
 
-        private void AddLocalMaxPoly(Edge edge1, Edge edge2, in IntPoint point)
+        private void AddLocalMaxPoly(Edge edge1, Edge edge2, in PointL point)
         {
             AddOutputPoint(edge1, point);
 
@@ -1634,7 +1635,7 @@ namespace Clipper
             }
         }
 
-        private OutputPoint AddLocalMinPoly(Edge edge1, Edge edge2, in IntPoint point)
+        private OutputPoint AddLocalMinPoly(Edge edge1, Edge edge2, in PointL point)
         {
             OutputPoint result;
             Edge edge, prev;
@@ -1667,7 +1668,7 @@ namespace Clipper
                 edge.WindDelta == 0 ||
                 prev.WindDelta == 0 ||
                 !GeometryHelper.SlopesEqual(
-                    new IntPoint(xPrev, point.Y), prev.Top, new IntPoint(xEdge, point.Y), edge.Top, _useFullRange))
+                    new PointL(xPrev, point.Y), prev.Top, new PointL(xEdge, point.Y), edge.Top, _useFullRange))
             {
                 return result;
             }
@@ -1679,7 +1680,7 @@ namespace Clipper
             return result;
         }
 
-        private OutputPoint AddOutputPoint(Edge edge, in IntPoint point)
+        private OutputPoint AddOutputPoint(Edge edge, in PointL point)
         {
             if (edge.OutIndex < 0)
             {
@@ -2073,7 +2074,7 @@ namespace Clipper
 #if use_lines
         private void IntersectLines(
             Edge edge1, Edge edge2,
-            in IntPoint point,
+            in PointL point,
             bool e1Contributing, bool e2Contributing)
         {
             // ignore subject-subject open path intersections UNLESS they
@@ -2166,7 +2167,7 @@ namespace Clipper
             }
         }
 
-        private void IntersectEdges(Edge edge1, Edge edge2, in IntPoint point)
+        private void IntersectEdges(Edge edge1, Edge edge2, in PointL point)
         {
             // edge1 will be to the left of edge2 BELOW the intersection. Therefore edge1 is before
             // edge2 in AEL except when edge1 is being inserted at the intersection point ...
@@ -2420,7 +2421,7 @@ namespace Clipper
                             {
                                 if (horzEdge.OutIndex >= 0 && !isOpen)
                                 {
-                                    AddOutputPoint(horzEdge, new IntPoint(currMax.X, horzEdge.Bottom.Y));
+                                    AddOutputPoint(horzEdge, new PointL(currMax.X, horzEdge.Bottom.Y));
                                 }
                                 currMax = currMax.Next;
                             }
@@ -2431,7 +2432,7 @@ namespace Clipper
                             {
                                 if (horzEdge.OutIndex >= 0 && !isOpen)
                                 {
-                                    AddOutputPoint(horzEdge, new IntPoint(currMax.X, horzEdge.Bottom.Y));
+                                    AddOutputPoint(horzEdge, new PointL(currMax.X, horzEdge.Bottom.Y));
                                 }
                                 currMax = currMax.Prev;
                             }
@@ -2493,11 +2494,11 @@ namespace Clipper
 
                     if (edgeDirection == EdgeDirection.LeftToRight)
                     {
-                        IntersectEdges(horzEdge, edge, new IntPoint(edge.Current.X, horzEdge.Current.Y));
+                        IntersectEdges(horzEdge, edge, new PointL(edge.Current.X, horzEdge.Current.Y));
                     }
                     else
                     {
-                        IntersectEdges(edge, horzEdge, new IntPoint(edge.Current.X, horzEdge.Current.Y));
+                        IntersectEdges(edge, horzEdge, new PointL(edge.Current.X, horzEdge.Current.Y));
                     }
 
                     var nextInAel = GetNextInAel(edge, edgeDirection);
@@ -2690,7 +2691,7 @@ namespace Clipper
             {
                 edge.PrevInSel = edge.PrevInAel;
                 edge.NextInSel = edge.NextInAel;
-                edge.Current = new IntPoint(TopX(edge, topY), edge.Current.Y);
+                edge.Current = new PointL(TopX(edge, topY), edge.Current.Y);
                 edge = edge.NextInAel;
             }
 
@@ -2706,12 +2707,12 @@ namespace Clipper
                     var nextInSel = edge.NextInSel;
                     if (edge.Current.X > nextInSel.Current.X)
                     {
-                        IntPoint point;
+                        PointL point;
                         IntersectPoint(edge, nextInSel, out point);
 
                         if (point.Y < topY)
                         {
-                            point = new IntPoint(TopX(edge, topY), topY);
+                            point = new PointL(TopX(edge, topY), topY);
                         }
 
                         var node = new IntersectNode
@@ -2801,15 +2802,15 @@ namespace Clipper
                 : edge.Bottom.X + (edge.Dx * (currentY - edge.Bottom.Y)).RoundToLong();
         }
 
-        private static void IntersectPoint(Edge edge1, Edge edge2, out IntPoint point)
+        private static void IntersectPoint(Edge edge1, Edge edge2, out PointL point)
         {
-            point = new IntPoint();
+            point = new PointL();
 
             // nb: with very large coordinate values, it's possible for SlopesEqual() to 
             // return false but for the edge.Dx value be equal due to double precision rounding.
             if (GeometryHelper.NearZero(edge1.Dx - edge2.Dx))
             {
-                point = new IntPoint(TopX(edge1, point.Y), edge1.Current.Y);
+                point = new PointL(TopX(edge1, point.Y), edge1.Current.Y);
                 return;
             }
 
@@ -2820,24 +2821,24 @@ namespace Clipper
             {
                 if (edge2.IsHorizontal)
                 {
-                    point = new IntPoint(edge1.Bottom.X, edge2.Bottom.Y);
+                    point = new PointL(edge1.Bottom.X, edge2.Bottom.Y);
                 }
                 else
                 {
                     b2 = edge2.Bottom.Y - edge2.Bottom.X / edge2.Dx;
-                    point = new IntPoint(edge1.Bottom.X, (edge1.Bottom.X / edge2.Dx + b2).RoundToLong());
+                    point = new PointL(edge1.Bottom.X, (edge1.Bottom.X / edge2.Dx + b2).RoundToLong());
                 }
             }
             else if (edge2.Delta.X == 0)
             {
                 if (edge1.IsHorizontal)
                 {
-                    point = new IntPoint(edge2.Bottom.X, edge1.Bottom.Y);
+                    point = new PointL(edge2.Bottom.X, edge1.Bottom.Y);
                 }
                 else
                 {
                     b1 = edge1.Bottom.Y - edge1.Bottom.X / edge1.Dx;
-                    point = new IntPoint(edge2.Bottom.X, (edge2.Bottom.X / edge1.Dx + b1).RoundToLong());
+                    point = new PointL(edge2.Bottom.X, (edge2.Bottom.X / edge1.Dx + b1).RoundToLong());
                 }
             }
             else
@@ -2845,7 +2846,7 @@ namespace Clipper
                 b1 = edge1.Bottom.X - edge1.Bottom.Y * edge1.Dx;
                 b2 = edge2.Bottom.X - edge2.Bottom.Y * edge2.Dx;
                 var q = (b2 - b1) / (edge1.Dx - edge2.Dx);
-                point = new IntPoint(
+                point = new PointL(
                     Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx)
                         ? (edge1.Dx * q + b1).RoundToLong()
                         : (edge2.Dx * q + b2).RoundToLong(),
@@ -2854,7 +2855,7 @@ namespace Clipper
 
             if (point.Y < edge1.Top.Y || point.Y < edge2.Top.Y)
             {
-                point = new IntPoint(
+                point = new PointL(
                     TopX(Math.Abs(edge1.Dx) < Math.Abs(edge2.Dx) ? edge1 : edge2, point.Y),
                     edge1.Top.Y > edge2.Top.Y ? edge1.Top.Y : edge2.Top.Y);
             }
@@ -2863,7 +2864,7 @@ namespace Clipper
             if (point.Y <= edge1.Current.Y) return;
 
             //better to use the more vertical edge to derive X ...
-            point = new IntPoint(
+            point = new PointL(
                 TopX(Math.Abs(edge1.Dx) > Math.Abs(edge2.Dx) ? edge2 : edge1, edge1.Current.Y),
                 edge1.Current.Y);
         }
@@ -2908,7 +2909,7 @@ namespace Clipper
                     }
                     else
                     {
-                        edge.Current = new IntPoint(TopX(edge, topY), topY);
+                        edge.Current = new PointL(TopX(edge, topY), topY);
                     }
 
                     // When SimplifySolution and 'edge' is being touched by another edge, then
@@ -3266,7 +3267,7 @@ namespace Clipper
         private static bool JoinHorz(
             OutputPoint op1, OutputPoint op1B,
             OutputPoint op2, OutputPoint op2B,
-            in IntPoint point, bool discardLeft)
+            in PointL point, bool discardLeft)
         {
             var dir1 = op1.Point.X > op1B.Point.X
                 ? EdgeDirection.RightToLeft
@@ -3514,7 +3515,7 @@ namespace Clipper
                 //DiscardLeftSide: when overlapping edges are joined, a spike will created
                 //which needs to be cleaned up. However, we don't want point1 or point2 caught up
                 //on the discard Side as either may still be needed for other joins ...
-                IntPoint point;
+                PointL point;
                 bool discardLeftSide;
                 if (op1.Point.X >= left && op1.Point.X <= right)
                 {
@@ -3619,7 +3620,7 @@ namespace Clipper
             return true;
         }
 
-        private static int PointInPolygon(in IntPoint point, OutputPoint op)
+        private static int PointInPolygon(in PointL point, OutputPoint op)
         {
             // returns 0 if false, +1 if true, -1 if point ON polygon boundary
             var result = 0;

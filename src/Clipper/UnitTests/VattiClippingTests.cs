@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Clipper;
+using Clipper.Custom;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTests
@@ -25,11 +26,11 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(00.0, 00.0),
-                        new DoublePoint(10.0, 10.0),
-                        new DoublePoint(10.0, 00.0),
-                        new DoublePoint(00.0, 10.0)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(00.0, 00.0),
+                        Scaled(10.0, 10.0),
+                        Scaled(10.0, 00.0),
+                        Scaled(00.0, 10.0)
+                    }));
 
             const double expectedArea = 50.0;
 
@@ -47,24 +48,26 @@ namespace UnitTests
             Assert.AreEqual(2, solution.Count);
 
             var polygon = solution[0];
-            Assert.AreEqual(3, polygon.Count);
             polygon.OrderBottomLeftFirst();
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(00.0 * Scale, polygon[0].X); Assert.AreEqual(00.0 * Scale, polygon[0].Y);
-            Assert.AreEqual(05.0 * Scale, polygon[1].X); Assert.AreEqual(05.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(00.0 * Scale, polygon[2].X); Assert.AreEqual(10.0 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(00.0, 00.0),
+                Scaled(05.0, 05.0),
+                Scaled(00.0, 10.0));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(10.0 * Scale, polygon[0].X); Assert.AreEqual(00.0 * Scale, polygon[0].Y);
-            Assert.AreEqual(10.0 * Scale, polygon[1].X); Assert.AreEqual(10.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(05.0 * Scale, polygon[2].X); Assert.AreEqual(05.0 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(10.0, 00.0),
+                Scaled(10.0, 10.0),
+                Scaled(05.0, 05.0));
         }
 
         [TestMethod]
@@ -74,21 +77,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0.0, 0.0),
-                        new DoublePoint(1.0, 0.0),
-                        new DoublePoint(1.0, 1.0),
-                        new DoublePoint(0.0, 1.0)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0.0, 0.0),
+                        Scaled(1.0, 0.0),
+                        Scaled(1.0, 1.0),
+                        Scaled(0.0, 1.0)
+                    }));
 
             var clip = new PolygonPath(
                     new Polygon(
                     new[]
                     {
-                        new DoublePoint(1.0, 0.0),
-                        new DoublePoint(2.0, 0.0),
-                        new DoublePoint(2.0, 1.0),
-                        new DoublePoint(1.0, 1.0)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(1.0, 0.0),
+                        Scaled(2.0, 0.0),
+                        Scaled(2.0, 1.0),
+                        Scaled(1.0, 1.0)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 1.0));
@@ -100,15 +103,16 @@ namespace UnitTests
             Assert.AreEqual(1, solution.Count);
 
             var polygon = solution[0];
-            Assert.AreEqual(4, polygon.Count);
             polygon.OrderBottomLeftFirst();
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(0.0 * Scale, polygon[0].X); Assert.AreEqual(0.0 * Scale, polygon[0].Y);
-            Assert.AreEqual(2.0 * Scale, polygon[1].X); Assert.AreEqual(0.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(2.0 * Scale, polygon[2].X); Assert.AreEqual(1.0 * Scale, polygon[2].Y);
-            Assert.AreEqual(0.0 * Scale, polygon[3].X); Assert.AreEqual(1.0 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(0.0, 0.0),
+                Scaled(2.0, 0.0),
+                Scaled(2.0, 1.0),
+                Scaled(0.0, 1.0));
         }
 
         [TestMethod]
@@ -118,21 +122,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(00, 00),
-                        new DoublePoint(10, 00),
-                        new DoublePoint(10, 10),
-                        new DoublePoint(00, 10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(00, 00),
+                        Scaled(10, 00),
+                        Scaled(10, 10),
+                        Scaled(00, 10)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(10, 00),
-                        new DoublePoint(20, 00),
-                        new DoublePoint(20, 10),
-                        new DoublePoint(10, 10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(10, 00),
+                        Scaled(20, 00),
+                        Scaled(20, 10),
+                        Scaled(10, 10)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 100.0));
@@ -144,15 +148,16 @@ namespace UnitTests
             Assert.AreEqual(1, solution.Count);
 
             var polygon = solution[0];
-            Assert.AreEqual(4, polygon.Count);
             polygon.OrderBottomLeftFirst();
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(00 * Scale, polygon[0].X); Assert.AreEqual(00 * Scale, polygon[0].Y);
-            Assert.AreEqual(20 * Scale, polygon[1].X); Assert.AreEqual(00 * Scale, polygon[1].Y);
-            Assert.AreEqual(20 * Scale, polygon[2].X); Assert.AreEqual(10 * Scale, polygon[2].Y);
-            Assert.AreEqual(00 * Scale, polygon[3].X); Assert.AreEqual(10 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(00, 00),
+                Scaled(20, 00),
+                Scaled(20, 10),
+                Scaled(00, 10));
         }
 
         [TestMethod]
@@ -162,21 +167,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(00, 00),
-                        new DoublePoint(10, 00),
-                        new DoublePoint(10, 10),
-                        new DoublePoint(00, 10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(00, 00),
+                        Scaled(10, 00),
+                        Scaled(10, 10),
+                        Scaled(00, 10)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(05, 00),
-                        new DoublePoint(15, 00),
-                        new DoublePoint(15, 10),
-                        new DoublePoint(05, 10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(05, 00),
+                        Scaled(15, 00),
+                        Scaled(15, 10),
+                        Scaled(05, 10)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 100.0));
@@ -188,15 +193,16 @@ namespace UnitTests
             Assert.AreEqual(1, solution.Count);
 
             var polygon = solution[0];
-            Assert.AreEqual(4, polygon.Count);
             polygon.OrderBottomLeftFirst();
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(00 * Scale, polygon[0].X); Assert.AreEqual(00 * Scale, polygon[0].Y);
-            Assert.AreEqual(15 * Scale, polygon[1].X); Assert.AreEqual(00 * Scale, polygon[1].Y);
-            Assert.AreEqual(15 * Scale, polygon[2].X); Assert.AreEqual(10 * Scale, polygon[2].Y);
-            Assert.AreEqual(00 * Scale, polygon[3].X); Assert.AreEqual(10 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(00, 00),
+                Scaled(15, 00),
+                Scaled(15, 10),
+                Scaled(00, 10));
         }
 
         [TestMethod]
@@ -206,21 +212,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+0.0, +0.0),
-                        new DoublePoint(+5.0, +0.0),
-                        new DoublePoint(+5.0, +5.0),
-                        new DoublePoint(+0.0, +5.0)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+0.0, +0.0),
+                        Scaled(+5.0, +0.0),
+                        Scaled(+5.0, +5.0),
+                        Scaled(+0.0, +5.0)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+2.5, -2.5),
-                        new DoublePoint(+7.5, -2.5),
-                        new DoublePoint(+7.5, +2.5),
-                        new DoublePoint(+2.5, +2.5)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+2.5, -2.5),
+                        Scaled(+7.5, -2.5),
+                        Scaled(+7.5, +2.5),
+                        Scaled(+2.5, +2.5)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 25.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 25.0));
@@ -234,18 +240,19 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(8, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+2.5 * Scale, polygon[0].X); Assert.AreEqual(-2.5 * Scale, polygon[0].Y);
-            Assert.AreEqual(+7.5 * Scale, polygon[1].X); Assert.AreEqual(-2.5 * Scale, polygon[1].Y);
-            Assert.AreEqual(+7.5 * Scale, polygon[2].X); Assert.AreEqual(+2.5 * Scale, polygon[2].Y);
-            Assert.AreEqual(+5.0 * Scale, polygon[3].X); Assert.AreEqual(+2.5 * Scale, polygon[3].Y);
-            Assert.AreEqual(+5.0 * Scale, polygon[4].X); Assert.AreEqual(+5.0 * Scale, polygon[4].Y);
-            Assert.AreEqual(+0.0 * Scale, polygon[5].X); Assert.AreEqual(+5.0 * Scale, polygon[5].Y);
-            Assert.AreEqual(+0.0 * Scale, polygon[6].X); Assert.AreEqual(+0.0 * Scale, polygon[6].Y);
-            Assert.AreEqual(+2.5 * Scale, polygon[7].X); Assert.AreEqual(+0.0 * Scale, polygon[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+2.5, -2.5),
+                Scaled(+7.5, -2.5),
+                Scaled(+7.5, +2.5),
+                Scaled(+5.0, +2.5),
+                Scaled(+5.0, +5.0),
+                Scaled(+0.0, +5.0),
+                Scaled(+0.0, +0.0),
+                Scaled(+2.5, +0.0));
         }
 
         [TestMethod]
@@ -255,21 +262,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0000, 0000),
-                        new DoublePoint(1000, 0000),
-                        new DoublePoint(1000, 1000),
-                        new DoublePoint(0000, 1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0000, 0000),
+                        Scaled(1000, 0000),
+                        Scaled(1000, 1000),
+                        Scaled(0000, 1000)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(2000, 0000),
-                        new DoublePoint(3000, 0000),
-                        new DoublePoint(3000, 1000),
-                        new DoublePoint(2000, 1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(2000, 0000),
+                        Scaled(3000, 0000),
+                        Scaled(3000, 1000),
+                        Scaled(2000, 1000)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 1000000));
@@ -282,25 +289,27 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(2000 * Scale, polygon[0].X); Assert.AreEqual(0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(3000 * Scale, polygon[1].X); Assert.AreEqual(0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(3000 * Scale, polygon[2].X); Assert.AreEqual(1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(2000 * Scale, polygon[3].X); Assert.AreEqual(1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(2000, 0000),
+                Scaled(3000, 0000),
+                Scaled(3000, 1000),
+                Scaled(2000, 1000));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(0000 * Scale, polygon[0].X); Assert.AreEqual(0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(1000 * Scale, polygon[1].X); Assert.AreEqual(0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(1000 * Scale, polygon[2].X); Assert.AreEqual(1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(0000 * Scale, polygon[3].X); Assert.AreEqual(1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(0000, 0000),
+                Scaled(1000, 0000),
+                Scaled(1000, 1000),
+                Scaled(0000, 1000));
         }
 
         [TestMethod]
@@ -310,11 +319,11 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0000, 0000),
-                        new DoublePoint(1000, 0000),
-                        new DoublePoint(1000, 1000),
-                        new DoublePoint(0000, 1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0000, 0000),
+                        Scaled(1000, 0000),
+                        Scaled(1000, 1000),
+                        Scaled(0000, 1000)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
 
@@ -326,14 +335,15 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(0000 * Scale, polygon[0].X); Assert.AreEqual(0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(1000 * Scale, polygon[1].X); Assert.AreEqual(0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(1000 * Scale, polygon[2].X); Assert.AreEqual(1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(0000 * Scale, polygon[3].X); Assert.AreEqual(1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(0000, 0000),
+                Scaled(1000, 0000),
+                Scaled(1000, 1000),
+                Scaled(0000, 1000));
         }
 
         [TestMethod]
@@ -343,20 +353,20 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0.0, 0.0),
-                        new DoublePoint(1.0, 0.0),
-                        new DoublePoint(1.0, 1.0),
-                        new DoublePoint(0.0, 1.0)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0.0, 0.0),
+                        Scaled(1.0, 0.0),
+                        Scaled(1.0, 1.0),
+                        Scaled(0.0, 1.0)
+                    }));
 
             var clip = new PolygonPath(new Polygon(
                     new[]
                     {
-                        new DoublePoint(2.0, 0.0),
-                        new DoublePoint(3.0, 0.0),
-                        new DoublePoint(3.0, 1.0),
-                        new DoublePoint(2.0, 1.0)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(2.0, 0.0),
+                        Scaled(3.0, 0.0),
+                        Scaled(3.0, 1.0),
+                        Scaled(2.0, 1.0)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 1.0));
@@ -370,14 +380,15 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(2.0 * Scale, polygon[0].X); Assert.AreEqual(0.0 * Scale, polygon[0].Y);
-            Assert.AreEqual(3.0 * Scale, polygon[1].X); Assert.AreEqual(0.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(3.0 * Scale, polygon[2].X); Assert.AreEqual(1.0 * Scale, polygon[2].Y);
-            Assert.AreEqual(2.0 * Scale, polygon[3].X); Assert.AreEqual(1.0 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(2.0, 0.0),
+                Scaled(3.0, 0.0),
+                Scaled(3.0, 1.0),
+                Scaled(2.0, 1.0));
         }
 
         [TestMethod]
@@ -387,21 +398,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+00, +00),
-                        new DoublePoint(+50, +00),
-                        new DoublePoint(+50, +50),
-                        new DoublePoint(+00, +50)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+00, +00),
+                        Scaled(+50, +00),
+                        Scaled(+50, +50),
+                        Scaled(+00, +50)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+25, -25),
-                        new DoublePoint(+75, -25),
-                        new DoublePoint(+75, +25),
-                        new DoublePoint(+25, +25)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+25, -25),
+                        Scaled(+75, -25),
+                        Scaled(+75, +25),
+                        Scaled(+25, +25)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 2500.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 2500.0));
@@ -415,14 +426,15 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+25 * Scale, polygon[0].X); Assert.AreEqual(+00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+50 * Scale, polygon[1].X); Assert.AreEqual(+00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+50 * Scale, polygon[2].X); Assert.AreEqual(+25 * Scale, polygon[2].Y);
-            Assert.AreEqual(+25 * Scale, polygon[3].X); Assert.AreEqual(+25 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+25, +00),
+                Scaled(+50, +00),
+                Scaled(+50, +25),
+                Scaled(+25, +25));
         }
 
         [TestMethod]
@@ -432,21 +444,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(00, 00),
-                        new DoublePoint(10, 00),
-                        new DoublePoint(10, 10),
-                        new DoublePoint(00, 10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(00, 00),
+                        Scaled(10, 00),
+                        Scaled(10, 10),
+                        Scaled(00, 10)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(05, 00),
-                        new DoublePoint(15, 00),
-                        new DoublePoint(15, 10),
-                        new DoublePoint(05, 10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(05, 00),
+                        Scaled(15, 00),
+                        Scaled(15, 10),
+                        Scaled(05, 10)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 100.0));
@@ -459,14 +471,15 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(05 * Scale, polygon[0].X); Assert.AreEqual(00 * Scale, polygon[0].Y);
-            Assert.AreEqual(10 * Scale, polygon[1].X); Assert.AreEqual(00 * Scale, polygon[1].Y);
-            Assert.AreEqual(10 * Scale, polygon[2].X); Assert.AreEqual(10 * Scale, polygon[2].Y);
-            Assert.AreEqual(05 * Scale, polygon[3].X); Assert.AreEqual(10 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(05, 00),
+                Scaled(10, 00),
+                Scaled(10, 10),
+                Scaled(05, 10));
         }
 
         [TestMethod]
@@ -476,21 +489,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0, 0),
-                        new DoublePoint(1, 0),
-                        new DoublePoint(1, 1),
-                        new DoublePoint(0, 1)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0, 0),
+                        Scaled(1, 0),
+                        Scaled(1, 1),
+                        Scaled(0, 1)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(2, 0),
-                        new DoublePoint(3, 0),
-                        new DoublePoint(3, 1),
-                        new DoublePoint(2, 1)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(2, 0),
+                        Scaled(3, 0),
+                        Scaled(3, 1),
+                        Scaled(2, 1)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area - AreaScale));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area - AreaScale));
@@ -509,21 +522,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+00, +00),
-                        new DoublePoint(+50, +00),
-                        new DoublePoint(+50, +50),
-                        new DoublePoint(+00, +50)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+00, +00),
+                        Scaled(+50, +00),
+                        Scaled(+50, +50),
+                        Scaled(+00, +50)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+25, -25),
-                        new DoublePoint(+75, -25),
-                        new DoublePoint(+75, +25),
-                        new DoublePoint(+25, +25)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+25, -25),
+                        Scaled(+75, -25),
+                        Scaled(+75, +25),
+                        Scaled(+25, +25)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 2500.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 2500.0));
@@ -541,30 +554,32 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(8, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+25 * Scale, polygon[0].X); Assert.AreEqual(-25 * Scale, polygon[0].Y);
-            Assert.AreEqual(+75 * Scale, polygon[1].X); Assert.AreEqual(-25 * Scale, polygon[1].Y);
-            Assert.AreEqual(+75 * Scale, polygon[2].X); Assert.AreEqual(+25 * Scale, polygon[2].Y);
-            Assert.AreEqual(+50 * Scale, polygon[3].X); Assert.AreEqual(+25 * Scale, polygon[3].Y);
-            Assert.AreEqual(+50 * Scale, polygon[4].X); Assert.AreEqual(+50 * Scale, polygon[4].Y);
-            Assert.AreEqual(+00 * Scale, polygon[5].X); Assert.AreEqual(+50 * Scale, polygon[5].Y);
-            Assert.AreEqual(+00 * Scale, polygon[6].X); Assert.AreEqual(+00 * Scale, polygon[6].Y);
-            Assert.AreEqual(+25 * Scale, polygon[7].X); Assert.AreEqual(+00 * Scale, polygon[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+25, -25),
+                Scaled(+75, -25),
+                Scaled(+75, +25),
+                Scaled(+50, +25),
+                Scaled(+50, +50),
+                Scaled(+00, +50),
+                Scaled(+00, +00),
+                Scaled(+25, +00));
 
             polygon = solution[1];
             polygon.Reverse();
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+25 * Scale, polygon[0].X); Assert.AreEqual(+00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+50 * Scale, polygon[1].X); Assert.AreEqual(+00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+50 * Scale, polygon[2].X); Assert.AreEqual(+25 * Scale, polygon[2].Y);
-            Assert.AreEqual(+25 * Scale, polygon[3].X); Assert.AreEqual(+25 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+25, +00),
+                Scaled(+50, +00),
+                Scaled(+50, +25),
+                Scaled(+25, +25));
         }
 
         [TestMethod]
@@ -574,21 +589,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0000, 0000),
-                        new DoublePoint(1000, 0000),
-                        new DoublePoint(1000, 1000),
-                        new DoublePoint(0000, 1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0000, 0000),
+                        Scaled(1000, 0000),
+                        Scaled(1000, 1000),
+                        Scaled(0000, 1000)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(2000, 0000),
-                        new DoublePoint(3000, 0000),
-                        new DoublePoint(3000, 1000),
-                        new DoublePoint(2000, 1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(2000, 0000),
+                        Scaled(3000, 0000),
+                        Scaled(3000, 1000),
+                        Scaled(2000, 1000)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 1000000));
@@ -601,25 +616,27 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(2000 * Scale, polygon[0].X); Assert.AreEqual(0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(3000 * Scale, polygon[1].X); Assert.AreEqual(0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(3000 * Scale, polygon[2].X); Assert.AreEqual(1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(2000 * Scale, polygon[3].X); Assert.AreEqual(1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(2000, 0000),
+                Scaled(3000, 0000),
+                Scaled(3000, 1000),
+                Scaled(2000, 1000));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(0000 * Scale, polygon[0].X); Assert.AreEqual(0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(1000 * Scale, polygon[1].X); Assert.AreEqual(0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(1000 * Scale, polygon[2].X); Assert.AreEqual(1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(0000 * Scale, polygon[3].X); Assert.AreEqual(1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(0000, 0000),
+                Scaled(1000, 0000),
+                Scaled(1000, 1000),
+                Scaled(0000, 1000));
         }
 
         [TestMethod]
@@ -628,20 +645,20 @@ namespace UnitTests
             var subject = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+00, +00),
-                    new DoublePoint(+50, +00),
-                    new DoublePoint(+50, +50),
-                    new DoublePoint(+00, +50)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00, +00),
+                    Scaled(+50, +00),
+                    Scaled(+50, +50),
+                    Scaled(+00, +50)
+                }));
 
             var clip = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+25, -25),
-                    new DoublePoint(+75, -25),
-                    new DoublePoint(+75, +25),
-                    new DoublePoint(+25, +25)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+25, -25),
+                    Scaled(+75, -25),
+                    Scaled(+75, +25),
+                    Scaled(+25, +25)
+                }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 2500.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 2500.0));
@@ -657,16 +674,17 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(6, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+00 * Scale, polygon[0].X); Assert.AreEqual(+00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+25 * Scale, polygon[1].X); Assert.AreEqual(+00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+25 * Scale, polygon[2].X); Assert.AreEqual(+25 * Scale, polygon[2].Y);
-            Assert.AreEqual(+50 * Scale, polygon[3].X); Assert.AreEqual(+25 * Scale, polygon[3].Y);
-            Assert.AreEqual(+50 * Scale, polygon[4].X); Assert.AreEqual(+50 * Scale, polygon[4].Y);
-            Assert.AreEqual(+00 * Scale, polygon[5].X); Assert.AreEqual(+50 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+00, +00),
+                Scaled(+25, +00),
+                Scaled(+25, +25),
+                Scaled(+50, +25),
+                Scaled(+50, +50),
+                Scaled(+00, +50));
         }
 
         [TestMethod]
@@ -676,20 +694,20 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(0000, 0000),
-                        new DoublePoint(1000, 0000),
-                        new DoublePoint(1000, 1000),
-                        new DoublePoint(0000, 1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(0000, 0000),
+                        Scaled(1000, 0000),
+                        Scaled(1000, 1000),
+                        Scaled(0000, 1000)
+                    }));
 
             var clip = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(2000, 0000),
-                    new DoublePoint(3000, 0000),
-                    new DoublePoint(3000, 1000),
-                    new DoublePoint(2000, 1000)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(2000, 0000),
+                    Scaled(3000, 0000),
+                    Scaled(3000, 1000),
+                    Scaled(2000, 1000)
+                }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 1000000));
@@ -702,14 +720,15 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(0000 * Scale, polygon[0].X); Assert.AreEqual(0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(1000 * Scale, polygon[1].X); Assert.AreEqual(0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(1000 * Scale, polygon[2].X); Assert.AreEqual(1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(0000 * Scale, polygon[3].X); Assert.AreEqual(1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(0000, 0000),
+                Scaled(1000, 0000),
+                Scaled(1000, 1000),
+                Scaled(0000, 1000));
         }
 
         [TestMethod]
@@ -719,21 +738,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+00, +00),
-                        new DoublePoint(+10, +00),
-                        new DoublePoint(+10, +10),
-                        new DoublePoint(+00, +10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+00, +00),
+                        Scaled(+10, +00),
+                        Scaled(+10, +10),
+                        Scaled(+00, +10)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+02, +02),
-                        new DoublePoint(+08, +02),
-                        new DoublePoint(+08, +08),
-                        new DoublePoint(+02, +08)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+02, +02),
+                        Scaled(+08, +02),
+                        Scaled(+08, +08),
+                        Scaled(+02, +08)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 36.0));
@@ -747,20 +766,20 @@ namespace UnitTests
             var subject = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+00, +00),
-                    new DoublePoint(+10, +00),
-                    new DoublePoint(+10, +10),
-                    new DoublePoint(+00, +10)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00, +00),
+                    Scaled(+10, +00),
+                    Scaled(+10, +10),
+                    Scaled(+00, +10)
+                }));
 
             var clip = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+12, +12),
-                    new DoublePoint(+18, +12),
-                    new DoublePoint(+18, +18),
-                    new DoublePoint(+12, +18)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+12, +12),
+                    Scaled(+18, +12),
+                    Scaled(+18, +18),
+                    Scaled(+12, +18)
+                }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 36.0));
@@ -774,20 +793,20 @@ namespace UnitTests
             var subject = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+00, +00),
-                    new DoublePoint(+10, +00),
-                    new DoublePoint(+10, +10),
-                    new DoublePoint(+00, +10)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00, +00),
+                    Scaled(+10, +00),
+                    Scaled(+10, +10),
+                    Scaled(+00, +10)
+                }));
 
             var clip = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+00, +00),
-                    new DoublePoint(+10, +00),
-                    new DoublePoint(+10, +10),
-                    new DoublePoint(+00, +10)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00, +00),
+                    Scaled(+10, +00),
+                    Scaled(+10, +10),
+                    Scaled(+00, +10)
+                }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 100.0));
@@ -802,21 +821,21 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+00, +00),
-                        new DoublePoint(+10, +00),
-                        new DoublePoint(+10, +10),
-                        new DoublePoint(+00, +10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+00, +00),
+                        Scaled(+10, +00),
+                        Scaled(+10, +10),
+                        Scaled(+00, +10)
+                    }));
 
             var clip = new PolygonPath(
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+00, +00),
-                        new DoublePoint(+10, +00),
-                        new DoublePoint(+11, +10),
-                        new DoublePoint(+00, +10)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+00, +00),
+                        Scaled(+10, +00),
+                        Scaled(+11, +10),
+                        Scaled(+00, +10)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 100.0));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 105.0));
@@ -830,12 +849,12 @@ namespace UnitTests
             var path = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+00.00, +10.00),
-                    new DoublePoint(-05.00, -10.00),
-                    new DoublePoint(+10.00, +05.00),
-                    new DoublePoint(-10.00, +05.00),
-                    new DoublePoint(+05.00, -10.00)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00.00, +10.00),
+                    Scaled(-05.00, -10.00),
+                    Scaled(+10.00, +05.00),
+                    Scaled(-10.00, +05.00),
+                    Scaled(+05.00, -10.00)
+                }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(ClippingHelper.SimplifyPolygon(path, solution));
@@ -844,44 +863,49 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-01.25 * Scale, polygon[0].X); Assert.AreEqual(+05.00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+01.25 * Scale, polygon[1].X); Assert.AreEqual(+05.00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+00.00 * Scale, polygon[2].X); Assert.AreEqual(+10.00 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-01.25, +05.00),
+                Scaled(+01.25, +05.00),
+                Scaled(+00.00, +10.00));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(3, polygon.Count);
-            Assert.AreEqual(-03.00 * Scale, polygon[0].X); Assert.AreEqual(-02.00 * Scale, polygon[0].Y);
-            Assert.AreEqual(-01.25 * Scale, polygon[1].X); Assert.AreEqual(+05.00 * Scale, polygon[1].Y);
-            Assert.AreEqual(-10.00 * Scale, polygon[2].X); Assert.AreEqual(+05.00 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-03.00, -02.00),
+                Scaled(-01.25, +05.00),
+                Scaled(-10.00, +05.00));
 
             polygon = solution[2];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
-            Assert.AreEqual(+05.00 * Scale, polygon[0].X); Assert.AreEqual(-10.00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+03.00 * Scale, polygon[1].X); Assert.AreEqual(-02.00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+00.00 * Scale, polygon[2].X); Assert.AreEqual(-05.00 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+05.00, -10.00),
+                Scaled(+03.00, -02.00),
+                Scaled(+00.00, -05.00));
 
             polygon = solution[3];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
-            Assert.AreEqual(+03.00 * Scale, polygon[0].X); Assert.AreEqual(-02.00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+10.00 * Scale, polygon[1].X); Assert.AreEqual(+05.00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+01.25 * Scale, polygon[2].X); Assert.AreEqual(+05.00 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+03.00, -02.00),
+                Scaled(+10.00, +05.00),
+                Scaled(+01.25, +05.00));
 
             polygon = solution[4];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
-            Assert.AreEqual(-05.00 * Scale, polygon[0].X); Assert.AreEqual(-10.00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+00.00 * Scale, polygon[1].X); Assert.AreEqual(-05.00 * Scale, polygon[1].Y);
-            Assert.AreEqual(-03.00 * Scale, polygon[2].X); Assert.AreEqual(-02.00 * Scale, polygon[2].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-05.00, -10.00),
+                Scaled(+00.00, -05.00),
+                Scaled(-03.00, -02.00));
         }
 
         [TestMethod]
@@ -891,11 +915,11 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+0000, +0000),
-                        new DoublePoint(+1000, +0000),
-                        new DoublePoint(+1000, +1000),
-                        new DoublePoint(+0000, +1000)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+0000, +0000),
+                        Scaled(+1000, +0000),
+                        Scaled(+1000, +1000),
+                        Scaled(+0000, +1000)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
 
@@ -908,14 +932,15 @@ namespace UnitTests
             // First polygon is subject
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.IsTrue(GeometryHelper.NearZero(polygon.Area * AreaScaleInverse - 1000000));
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(+1000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[1].X); Assert.AreEqual(+1000 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[2].X); Assert.AreEqual(+0000 * Scale, polygon[2].Y);
-            Assert.AreEqual(+1000 * Scale, polygon[3].X); Assert.AreEqual(+0000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +1000),
+                Scaled(+0000, +1000),
+                Scaled(+0000, +0000),
+                Scaled(+1000, +0000));
         }
 
         [TestMethod]
@@ -925,19 +950,19 @@ namespace UnitTests
                 new Polygon(
                     new[]
                     {
-                        new DoublePoint(+0000, -0500),
-                        new DoublePoint(+0000, -0500),
-                        new DoublePoint(+0500, -0500),
-                        new DoublePoint(+0500, +0000),
-                        new DoublePoint(+0500, +0500),
-                        new DoublePoint(+0000, +0500),
-                        new DoublePoint(-0500, +0500),
-                        new DoublePoint(-0500, +0500),
-                        new DoublePoint(-0500, +0000),
-                        new DoublePoint(-0500, -0500),
-                        new DoublePoint(+0000, -0500),
-                        new DoublePoint(+0000, -0500)
-                    }.Select(p => new IntPoint(p * Scale))));
+                        Scaled(+0000, -0500),
+                        Scaled(+0000, -0500),
+                        Scaled(+0500, -0500),
+                        Scaled(+0500, +0000),
+                        Scaled(+0500, +0500),
+                        Scaled(+0000, +0500),
+                        Scaled(-0500, +0500),
+                        Scaled(-0500, +0500),
+                        Scaled(-0500, +0000),
+                        Scaled(-0500, -0500),
+                        Scaled(+0000, -0500),
+                        Scaled(+0000, -0500)
+                    }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
             var solution = new PolygonPath();
@@ -948,13 +973,14 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[1].X); Assert.AreEqual(+0500 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0500, -0500));
         }
 
         [TestMethod]
@@ -963,20 +989,20 @@ namespace UnitTests
             var subject = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0100, +0000),
-                    new DoublePoint(-0250, +0250),
-                    new DoublePoint(-0500, +0000),
-                    new DoublePoint(-0250, -0250)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+0100, +0000),
+                    Scaled(-0250, +0250),
+                    Scaled(-0500, +0000),
+                    Scaled(-0250, -0250)
+                }));
 
             var clip = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0100, +0000),
-                    new DoublePoint(+0250, -0250),
-                    new DoublePoint(+0500, +0000),
-                    new DoublePoint(+0250, +0250)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(-0100, +0000),
+                    Scaled(+0250, -0250),
+                    Scaled(+0500, +0000),
+                    Scaled(+0250, +0250)
+                }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 150000));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 150000));
@@ -988,17 +1014,18 @@ namespace UnitTests
             Assert.AreEqual(1, solution.Count);
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+500 * Scale, polygon[0].X); Assert.AreEqual(+000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+250 * Scale, polygon[1].X); Assert.AreEqual(+250 * Scale, polygon[1].Y);
-            Assert.AreEqual(+000 * Scale, polygon[2].X); Assert.IsTrue(GeometryHelper.NearZero(+071.4285714 * Scale - polygon[2].Y));
-            Assert.AreEqual(-250 * Scale, polygon[3].X); Assert.AreEqual(+250 * Scale, polygon[3].Y);
-            Assert.AreEqual(-500 * Scale, polygon[4].X); Assert.AreEqual(+000 * Scale, polygon[4].Y);
-            Assert.AreEqual(-250 * Scale, polygon[5].X); Assert.AreEqual(-250 * Scale, polygon[5].Y);
-            Assert.AreEqual(+000 * Scale, polygon[6].X); Assert.IsTrue(GeometryHelper.NearZero(-071.4285714 * Scale - polygon[6].Y - 0));
-            Assert.AreEqual(+250 * Scale, polygon[7].X); Assert.AreEqual(-250 * Scale, polygon[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+500, +000),
+                Scaled(+250, +250),
+                Scaled(+000, +071.4285714),
+                Scaled(-250, +250),
+                Scaled(-500, +000),
+                Scaled(-250, -250),
+                Scaled(+000, -071.4285714),
+                Scaled(+250, -250));
 
             solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -1006,54 +1033,57 @@ namespace UnitTests
             Assert.IsTrue(GeometryHelper.NearZero(solution.Area * AreaScaleInverse - 14285.71428));
             Assert.AreEqual(1, solution.Count);
             polygon = solution[0];
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+100 * Scale, polygon[0].X); Assert.AreEqual(+000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+000 * Scale, polygon[1].X); Assert.IsTrue(GeometryHelper.NearZero(+071.4285714 * Scale - polygon[1].Y));
-            Assert.AreEqual(-100 * Scale, polygon[2].X); Assert.AreEqual(+000 * Scale, polygon[2].Y);
-            Assert.AreEqual(+000 * Scale, polygon[3].X); Assert.IsTrue(GeometryHelper.NearZero(-071.4285714 * Scale - polygon[3].Y));
-
+            AssertEqual(
+                polygon,
+                Scaled(+100, +000),
+                Scaled(+000, +071.4285714),
+                Scaled(-100, +000),
+                Scaled(+000, -071.4285714));
 
             solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Difference, subject, clip, solution));
             Assert.IsTrue(GeometryHelper.NearZero(solution.Area * AreaScaleInverse - 135714.28571));
             Assert.AreEqual(1, solution.Count);
             polygon = solution[0];
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+000 * Scale, polygon[0].X); Assert.IsTrue(GeometryHelper.NearZero(-071.4285714 * Scale - polygon[0].Y));
-            Assert.AreEqual(-100 * Scale, polygon[1].X); Assert.AreEqual(+000 * Scale, polygon[1].Y);
-            Assert.AreEqual(+000 * Scale, polygon[2].X); Assert.IsTrue(GeometryHelper.NearZero(+071.4285714 * Scale - polygon[2].Y));
-            Assert.AreEqual(-250 * Scale, polygon[3].X); Assert.AreEqual(+250 * Scale, polygon[3].Y);
-            Assert.AreEqual(-500 * Scale, polygon[4].X); Assert.AreEqual(+000 * Scale, polygon[4].Y);
-            Assert.AreEqual(-250 * Scale, polygon[5].X); Assert.AreEqual(-250 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+000, -071.4285714),
+                Scaled(-100, +000),
+                Scaled(+000, +071.4285714),
+                Scaled(-250, +250),
+                Scaled(-500, +000),
+                Scaled(-250, -250));
 
             solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Xor, subject, clip, solution));
             Assert.IsTrue(GeometryHelper.NearZero(solution.Area * AreaScaleInverse - 271428.57142));
             Assert.AreEqual(2, solution.Count);
             polygon = solution[0];
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+500 * Scale, polygon[0].X); Assert.AreEqual(+000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+250 * Scale, polygon[1].X); Assert.AreEqual(+250 * Scale, polygon[1].Y);
-            Assert.AreEqual(+000 * Scale, polygon[2].X); Assert.IsTrue(GeometryHelper.NearZero(+071.4285714 * Scale - polygon[2].Y));
-            Assert.AreEqual(+100 * Scale, polygon[3].X); Assert.AreEqual(+000 * Scale, polygon[3].Y);
-            Assert.AreEqual(+000 * Scale, polygon[4].X); Assert.IsTrue(GeometryHelper.NearZero(-071.4285714 * Scale - polygon[4].Y));
-            Assert.AreEqual(+250 * Scale, polygon[5].X); Assert.AreEqual(-250 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+500, +000),
+                Scaled(+250, +250),
+                Scaled(+000, +071.4285714),
+                Scaled(+100, +000),
+                Scaled(+000, -071.4285714),
+                Scaled(+250, -250));
             polygon = solution[1];
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+000 * Scale, polygon[0].X); Assert.IsTrue(GeometryHelper.NearZero(-071.4285714 * Scale - polygon[0].Y));
-            Assert.AreEqual(-100 * Scale, polygon[1].X); Assert.AreEqual(+000 * Scale, polygon[1].Y);
-            Assert.AreEqual(+000 * Scale, polygon[2].X); Assert.IsTrue(GeometryHelper.NearZero(+071.4285714 * Scale - polygon[2].Y));
-            Assert.AreEqual(-250 * Scale, polygon[3].X); Assert.AreEqual(+250 * Scale, polygon[3].Y);
-            Assert.AreEqual(-500 * Scale, polygon[4].X); Assert.AreEqual(+000 * Scale, polygon[4].Y);
-            Assert.AreEqual(-250 * Scale, polygon[5].X); Assert.AreEqual(-250 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+000, -071.4285714),
+                Scaled(-100, +000),
+                Scaled(+000, +071.4285714),
+                Scaled(-250, +250),
+                Scaled(-500, +000),
+                Scaled(-250, -250));
         }
 
         [TestMethod]
@@ -1062,20 +1092,20 @@ namespace UnitTests
             var subject = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(+1000, +0500),
-                    new DoublePoint(+0500, +1000),
-                    new DoublePoint(-1000, +0500),
-                    new DoublePoint(+0000, +0000)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+1000, +0500),
+                    Scaled(+0500, +1000),
+                    Scaled(-1000, +0500),
+                    Scaled(+0000, +0000)
+                }));
 
             var clip = new PolygonPath(new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, -1000),
-                    new DoublePoint(+1000, -0500),
-                    new DoublePoint(+0000, +0000),
-                    new DoublePoint(-1000, -0500)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(-0500, -1000),
+                    Scaled(+1000, -0500),
+                    Scaled(+0000, +0000),
+                    Scaled(-1000, -0500)
+                }));
 
             Assert.IsTrue(GeometryHelper.NearZero(subject.Area * AreaScaleInverse - 1000000));
             Assert.IsTrue(GeometryHelper.NearZero(clip.Area * AreaScaleInverse - 1000000));
@@ -1088,23 +1118,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[1].X); Assert.AreEqual(+1000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[2].X); Assert.AreEqual(+0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[3].X); Assert.AreEqual(+0000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +0500),
+                Scaled(+0500, +1000),
+                Scaled(-1000, +0500),
+                Scaled(+0000, +0000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(-0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[1].X); Assert.AreEqual(+0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[3].X); Assert.AreEqual(-1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, -0500),
+                Scaled(+0000, +0000),
+                Scaled(-1000, -0500),
+                Scaled(-0500, -1000));
 
             solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -1118,13 +1150,14 @@ namespace UnitTests
             Assert.AreEqual(1, solution.Count);
 
             polygon = solution[0];
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[1].X); Assert.AreEqual(+1000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[2].X); Assert.AreEqual(+0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[3].X); Assert.AreEqual(+0000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +0500),
+                Scaled(+0500, +1000),
+                Scaled(-1000, +0500),
+                Scaled(+0000, +0000));
 
             solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Xor, subject, clip, solution));
@@ -1133,19 +1166,22 @@ namespace UnitTests
             polygon = solution[0];
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[1].X); Assert.AreEqual(+1000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[2].X); Assert.AreEqual(+0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[3].X); Assert.AreEqual(+0000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +0500),
+                Scaled(+0500, +1000),
+                Scaled(-1000, +0500),
+                Scaled(+0000, +0000));
 
             polygon = solution[1];
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(-0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[1].X); Assert.AreEqual(+0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[3].X); Assert.AreEqual(-1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, -0500),
+                Scaled(+0000, +0000),
+                Scaled(-1000, -0500),
+                Scaled(-0500, -1000));
         }
 
         [TestMethod]
@@ -1154,29 +1190,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var merge1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var merge2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0250, +0250),
-                    new DoublePoint(+0250, -0250),
-                    new DoublePoint(-0250, -0250),
-                    new DoublePoint(-0250, +0250)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0250, +0250),
+                    Scaled(+0250, -0250),
+                    Scaled(-0250, -0250),
+                    Scaled(-0250, +0250)
+                });
 
             var subject = new PolygonPath(subject1);
             var clip = new PolygonPath(new[] { merge1, merge2 });
@@ -1192,23 +1228,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[1].X); Assert.AreEqual(+0500 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0500, -0500));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0250 * Scale, polygon[0].X); Assert.AreEqual(-0250 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0250 * Scale, polygon[1].X); Assert.AreEqual(+0250 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0250 * Scale, polygon[2].X); Assert.AreEqual(+0250 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0250 * Scale, polygon[3].X); Assert.AreEqual(-0250 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0250, -0250),
+                Scaled(-0250, +0250),
+                Scaled(+0250, +0250),
+                Scaled(+0250, -0250));
         }
 
         [TestMethod]
@@ -1217,38 +1255,38 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0000, +1000),
-                    new DoublePoint(+0000, +0000),
-                    new DoublePoint(+0900, +0000),
-                    new DoublePoint(+0900, +1000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0000, +1000),
+                    Scaled(+0000, +0000),
+                    Scaled(+0900, +0000),
+                    Scaled(+0900, +1000)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0200),
-                    new DoublePoint(+0200, +0200),
-                    new DoublePoint(+0200, +0800),
-                    new DoublePoint(+0400, +0800)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0200),
+                    Scaled(+0200, +0200),
+                    Scaled(+0200, +0800),
+                    Scaled(+0400, +0800)
+                });
 
             var merge1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+1000, +1000),
-                    new DoublePoint(+0100, +1000),
-                    new DoublePoint(+0100, +0000),
-                    new DoublePoint(+1000, +0000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+1000, +1000),
+                    Scaled(+0100, +1000),
+                    Scaled(+0100, +0000),
+                    Scaled(+1000, +0000)
+                });
 
             var merge2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0600, +0200),
-                    new DoublePoint(+0600, +0800),
-                    new DoublePoint(+0800, +0800),
-                    new DoublePoint(+0800, +0200)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0600, +0200),
+                    Scaled(+0600, +0800),
+                    Scaled(+0800, +0800),
+                    Scaled(+0800, +0200)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(new[] { merge1, merge2 });
@@ -1264,32 +1302,35 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0900 * Scale, polygon[0].X); Assert.AreEqual(+1000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0100 * Scale, polygon[1].X); Assert.AreEqual(+1000 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0100 * Scale, polygon[2].X); Assert.AreEqual(+0000 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0900 * Scale, polygon[3].X); Assert.AreEqual(+0000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0900, +1000),
+                Scaled(+0100, +1000),
+                Scaled(+0100, +0000),
+                Scaled(+0900, +0000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0600 * Scale, polygon[0].X); Assert.AreEqual(+0200 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0600 * Scale, polygon[1].X); Assert.AreEqual(+0800 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0800 * Scale, polygon[2].X); Assert.AreEqual(+0800 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0800 * Scale, polygon[3].X); Assert.AreEqual(+0200 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0600, +0200),
+                Scaled(+0600, +0800),
+                Scaled(+0800, +0800),
+                Scaled(+0800, +0200));
 
             polygon = solution[2];
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0200 * Scale, polygon[0].X); Assert.AreEqual(+0200 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0200 * Scale, polygon[1].X); Assert.AreEqual(+0800 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0800 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(+0200 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0200, +0200),
+                Scaled(+0200, +0800),
+                Scaled(+0400, +0800),
+                Scaled(+0400, +0200));
         }
 
         [TestMethod]
@@ -1298,29 +1339,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0000, +0000),
-                    new DoublePoint(+0000, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0000, +0000),
+                    Scaled(+0000, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0000)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -1336,29 +1377,31 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000, polygonPoints[0].X); Assert.AreEqual(+0000, polygonPoints[0].Y);
-            Assert.AreEqual(+0500, polygonPoints[1].X); Assert.AreEqual(+0000, polygonPoints[1].Y);
-            Assert.AreEqual(+0500, polygonPoints[2].X); Assert.AreEqual(+0500, polygonPoints[2].Y);
-            Assert.AreEqual(-0500, polygonPoints[3].X); Assert.AreEqual(+0500, polygonPoints[3].Y);
-            Assert.AreEqual(-0500, polygonPoints[4].X); Assert.AreEqual(-0500, polygonPoints[4].Y);
-            Assert.AreEqual(+0000, polygonPoints[5].X); Assert.AreEqual(-0500, polygonPoints[5].Y);
-            Assert.AreEqual(+0000, polygonPoints[6].X); Assert.AreEqual(-1000, polygonPoints[6].Y);
-            Assert.AreEqual(+1000, polygonPoints[7].X); Assert.AreEqual(-1000, polygonPoints[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +0000),
+                Scaled(+0500, +0000),
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0000, -0500),
+                Scaled(+0000, -1000),
+                Scaled(+1000, -1000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(+0000 * Scale, polygon[3].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[4].X); Assert.AreEqual(+0000 * Scale, polygon[4].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[5].X); Assert.AreEqual(-0400 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, +0000),
+                Scaled(+0000, +0000),
+                Scaled(+0000, -0400));
         }
 
         [TestMethod]
@@ -1367,38 +1410,38 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-1000, +1000),
-                    new DoublePoint(-1000, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +1000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-1000, +1000),
+                    Scaled(-1000, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +1000)
+                });
 
             var clip2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(new[] { clip1, clip2 });
@@ -1414,23 +1457,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000 * Scale, polygon[0].X); Assert.AreEqual(+1000 * Scale, polygon[0].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[1].X); Assert.AreEqual(+1000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-1000 * Scale, polygon[2].X); Assert.AreEqual(-1000 * Scale, polygon[2].Y);
-            Assert.AreEqual(+1000 * Scale, polygon[3].X); Assert.AreEqual(-1000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +1000),
+                Scaled(-1000, +1000),
+                Scaled(-1000, -1000),
+                Scaled(+1000, -1000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -1439,38 +1484,38 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var clip2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(new[] { clip1, clip2 });
@@ -1486,23 +1531,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[1].X); Assert.AreEqual(+0500 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0500, -0500));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -1511,29 +1558,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0.05, +0.05),
-                    new DoublePoint(-0.05, -0.05),
-                    new DoublePoint(+0.05, -0.05),
-                    new DoublePoint(+0.05, +0.05)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0.05, +0.05),
+                    Scaled(-0.05, -0.05),
+                    Scaled(+0.05, -0.05),
+                    Scaled(+0.05, +0.05)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0.04, +0.04),
-                    new DoublePoint(+0.04, -0.04),
-                    new DoublePoint(-0.04, -0.04),
-                    new DoublePoint(-0.04, +0.04)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0.04, +0.04),
+                    Scaled(+0.04, -0.04),
+                    Scaled(-0.04, -0.04),
+                    Scaled(-0.04, +0.04)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0.00, +0.00),
-                    new DoublePoint(+0.00, -0.10),
-                    new DoublePoint(+0.10, -0.10),
-                    new DoublePoint(+0.10, +0.00)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0.00, +0.00),
+                    Scaled(+0.00, -0.10),
+                    Scaled(+0.10, -0.10),
+                    Scaled(+0.10, +0.00)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -1549,29 +1596,31 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0.10 * Scale, polygon[0].X); Assert.AreEqual(+0.00 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0.05 * Scale, polygon[1].X); Assert.AreEqual(+0.00 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0.05 * Scale, polygon[2].X); Assert.AreEqual(+0.05 * Scale, polygon[2].Y);
-            Assert.AreEqual(-0.05 * Scale, polygon[3].X); Assert.AreEqual(+0.05 * Scale, polygon[3].Y);
-            Assert.AreEqual(-0.05 * Scale, polygon[4].X); Assert.AreEqual(-0.05 * Scale, polygon[4].Y);
-            Assert.AreEqual(+0.00 * Scale, polygon[5].X); Assert.AreEqual(-0.05 * Scale, polygon[5].Y);
-            Assert.AreEqual(+0.00 * Scale, polygon[6].X); Assert.AreEqual(-0.10 * Scale, polygon[6].Y);
-            Assert.AreEqual(+0.10 * Scale, polygon[7].X); Assert.AreEqual(-0.10 * Scale, polygon[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0.10, +0.00),
+                Scaled(+0.05, +0.00),
+                Scaled(+0.05, +0.05),
+                Scaled(-0.05, +0.05),
+                Scaled(-0.05, -0.05),
+                Scaled(+0.00, -0.05),
+                Scaled(+0.00, -0.10),
+                Scaled(+0.10, -0.10));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0.04 * Scale, polygon[0].X); Assert.AreEqual(-0.04 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0.04 * Scale, polygon[1].X); Assert.AreEqual(+0.04 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0.04 * Scale, polygon[2].X); Assert.AreEqual(+0.04 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0.04 * Scale, polygon[3].X); Assert.AreEqual(+0.00 * Scale, polygon[3].Y);
-            Assert.AreEqual(+0.00 * Scale, polygon[4].X); Assert.AreEqual(+0.00 * Scale, polygon[4].Y);
-            Assert.AreEqual(+0.00 * Scale, polygon[5].X); Assert.AreEqual(-0.04 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0.04, -0.04),
+                Scaled(-0.04, +0.04),
+                Scaled(+0.04, +0.04),
+                Scaled(+0.04, +0.00),
+                Scaled(+0.00, +0.00),
+                Scaled(+0.00, -0.04));
         }
 
         [TestMethod]
@@ -1586,20 +1635,20 @@ namespace UnitTests
             var subjectPolygon = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-large, +large),
-                    new DoublePoint(-large, -large),
-                    new DoublePoint(+large, -large),
-                    new DoublePoint(+large, +large)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-large, +large),
+                    Scaled(-large, -large),
+                    Scaled(+large, -large),
+                    Scaled(+large, +large)
+                });
 
             var clipPolygon = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-small, +small),
-                    new DoublePoint(-small, -small),
-                    new DoublePoint(+small, -small),
-                    new DoublePoint(+small, +small)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-small, +small),
+                    Scaled(-small, -small),
+                    Scaled(+small, -small),
+                    Scaled(+small, +small)
+                });
 
             var subject = new PolygonPath(subjectPolygon);
             var clip = new PolygonPath(clipPolygon);
@@ -1620,24 +1669,26 @@ namespace UnitTests
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.IsTrue(GeometryHelper.NearZero(polygon.Area * AreaScaleInverse - subjectArea));
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+large * Scale, polygon[0].X); Assert.AreEqual(+large * Scale, polygon[0].Y);
-            Assert.AreEqual(-large * Scale, polygon[1].X); Assert.AreEqual(+large * Scale, polygon[1].Y);
-            Assert.AreEqual(-large * Scale, polygon[2].X); Assert.AreEqual(-large * Scale, polygon[2].Y);
-            Assert.AreEqual(+large * Scale, polygon[3].X); Assert.AreEqual(-large * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+large, +large),
+                Scaled(-large, +large),
+                Scaled(-large, -large),
+                Scaled(+large, -large));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.IsTrue(GeometryHelper.NearZero(polygon.Area * AreaScaleInverse + clipArea));
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-small * Scale, polygon[0].X); Assert.AreEqual(-small * Scale, polygon[0].Y);
-            Assert.AreEqual(-small * Scale, polygon[1].X); Assert.AreEqual(+small * Scale, polygon[1].Y);
-            Assert.AreEqual(+small * Scale, polygon[2].X); Assert.AreEqual(+small * Scale, polygon[2].Y);
-            Assert.AreEqual(+small * Scale, polygon[3].X); Assert.AreEqual(-small * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-small, -small),
+                Scaled(-small, +small),
+                Scaled(+small, +small),
+                Scaled(+small, -small));
         }
 
         [TestMethod]
@@ -1652,20 +1703,20 @@ namespace UnitTests
             var subjectPolygon = new Polygon(
                 new[]
                 {
-                    new DoublePoint(     0,      0),
-                    new DoublePoint(+large,      0),
-                    new DoublePoint(+large, +large),
-                    new DoublePoint(     0, +large)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(     0,      0),
+                    Scaled(+large,      0),
+                    Scaled(+large, +large),
+                    Scaled(     0, +large)
+                });
 
             var clipPolygon = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-small, +small),
-                    new DoublePoint(-small, -small),
-                    new DoublePoint(+small, -small),
-                    new DoublePoint(+small, +small)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-small, +small),
+                    Scaled(-small, -small),
+                    Scaled(+small, -small),
+                    Scaled(+small, +small)
+                });
 
             var subject = new PolygonPath(subjectPolygon);
             var clip = new PolygonPath(clipPolygon);
@@ -1709,20 +1760,20 @@ namespace UnitTests
             var subjectPolygon = new Polygon(
                 new[]
                 {
-                    new DoublePoint(     0,      0),
-                    new DoublePoint(+large,      0),
-                    new DoublePoint(+large, +large),
-                    new DoublePoint(     0, +large)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(     0,      0),
+                    Scaled(+large,      0),
+                    Scaled(+large, +large),
+                    Scaled(     0, +large)
+                });
 
             var clipPolygon = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-small, +small),
-                    new DoublePoint(-small, -small),
-                    new DoublePoint(+small, -small),
-                    new DoublePoint(+small, +small)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-small, +small),
+                    Scaled(-small, -small),
+                    Scaled(+small, -small),
+                    Scaled(+small, +small)
+                });
 
             var subject = new PolygonPath(subjectPolygon);
             var clip = new PolygonPath(clipPolygon);
@@ -1762,29 +1813,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-050000, +050000),
-                    new DoublePoint(-050000, -050000),
-                    new DoublePoint(+050000, -050000),
-                    new DoublePoint(+050000, +050000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-050000, +050000),
+                    Scaled(-050000, -050000),
+                    Scaled(+050000, -050000),
+                    Scaled(+050000, +050000)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+040000, +040000),
-                    new DoublePoint(+040000, -040000),
-                    new DoublePoint(-040000, -040000),
-                    new DoublePoint(-040000, +040000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+040000, +040000),
+                    Scaled(+040000, -040000),
+                    Scaled(-040000, -040000),
+                    Scaled(-040000, +040000)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+000000, +000000),
-                    new DoublePoint(+000000, -100000),
-                    new DoublePoint(+100000, -100000),
-                    new DoublePoint(+100000, +000000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+000000, +000000),
+                    Scaled(+000000, -100000),
+                    Scaled(+100000, -100000),
+                    Scaled(+100000, +000000)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -1804,29 +1855,31 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+100000, polygonPoints[0].X); Assert.AreEqual(+000000, polygonPoints[0].Y);
-            Assert.AreEqual(+050000, polygonPoints[1].X); Assert.AreEqual(+000000, polygonPoints[1].Y);
-            Assert.AreEqual(+050000, polygonPoints[2].X); Assert.AreEqual(+050000, polygonPoints[2].Y);
-            Assert.AreEqual(-050000, polygonPoints[3].X); Assert.AreEqual(+050000, polygonPoints[3].Y);
-            Assert.AreEqual(-050000, polygonPoints[4].X); Assert.AreEqual(-050000, polygonPoints[4].Y);
-            Assert.AreEqual(+000000, polygonPoints[5].X); Assert.AreEqual(-050000, polygonPoints[5].Y);
-            Assert.AreEqual(+000000, polygonPoints[6].X); Assert.AreEqual(-100000, polygonPoints[6].Y);
-            Assert.AreEqual(+100000, polygonPoints[7].X); Assert.AreEqual(-100000, polygonPoints[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+100000, +000000),
+                Scaled(+050000, +000000),
+                Scaled(+050000, +050000),
+                Scaled(-050000, +050000),
+                Scaled(-050000, -050000),
+                Scaled(+000000, -050000),
+                Scaled(+000000, -100000),
+                Scaled(+100000, -100000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-40000, polygonPoints[0].X); Assert.AreEqual(-40000, polygonPoints[0].Y);
-            Assert.AreEqual(-40000, polygonPoints[1].X); Assert.AreEqual(+40000, polygonPoints[1].Y);
-            Assert.AreEqual(+40000, polygonPoints[2].X); Assert.AreEqual(+40000, polygonPoints[2].Y);
-            Assert.AreEqual(+40000, polygonPoints[3].X); Assert.AreEqual(+00000, polygonPoints[3].Y);
-            Assert.AreEqual(+00000, polygonPoints[4].X); Assert.AreEqual(+00000, polygonPoints[4].Y);
-            Assert.AreEqual(+00000, polygonPoints[5].X); Assert.AreEqual(-40000, polygonPoints[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-40000, -40000),
+                Scaled(-40000, +40000),
+                Scaled(+40000, +40000),
+                Scaled(+40000, +00000),
+                Scaled(+00000, +00000),
+                Scaled(+00000, -40000));
         }
 
         [TestMethod]
@@ -1835,29 +1888,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0000, +0000),
-                    new DoublePoint(+0000, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0000, +0000),
+                    Scaled(+0000, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0000)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -1873,15 +1926,16 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[1].X); Assert.AreEqual(+0000 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(-0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[4].X); Assert.AreEqual(-0500 * Scale, polygon[4].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[5].X); Assert.AreEqual(-0500 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0000),
+                Scaled(+0400, +0000),
+                Scaled(+0400, -0400),
+                Scaled(+0000, -0400),
+                Scaled(+0000, -0500),
+                Scaled(+0500, -0500));
         }
 
         [TestMethod]
@@ -1890,29 +1944,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0450, +0450),
-                    new DoublePoint(-0450, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0450)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0450, +0450),
+                    Scaled(-0450, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0450)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -1928,23 +1982,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0450 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0450 * Scale, polygon[1].X); Assert.AreEqual(+0450 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0450 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0450),
+                Scaled(-0450, +0450),
+                Scaled(-0450, -0500),
+                Scaled(+0500, -0500));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -1953,29 +2009,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0000, +0000),
-                    new DoublePoint(+0000, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0000, +0000),
+                    Scaled(+0000, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0000)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -1991,19 +2047,20 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(10, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0000 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(-0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(+0400 * Scale, polygon[3].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[4].X); Assert.AreEqual(+0000 * Scale, polygon[4].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[5].X); Assert.AreEqual(+0000 * Scale, polygon[5].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[6].X); Assert.AreEqual(+0500 * Scale, polygon[6].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[7].X); Assert.AreEqual(+0500 * Scale, polygon[7].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[8].X); Assert.AreEqual(-0500 * Scale, polygon[8].Y);
-            Assert.AreEqual(+0000 * Scale, polygon[9].X); Assert.AreEqual(-0500 * Scale, polygon[9].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0000, -0400),
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, +0000),
+                Scaled(+0500, +0000),
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0000, -0500));
         }
 
         [TestMethod]
@@ -2012,29 +2069,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0450, +0450),
-                    new DoublePoint(-0450, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0450)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0450, +0450),
+                    Scaled(-0450, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0450)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -2050,15 +2107,16 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(6, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0450 * Scale, polygon[0].X); Assert.AreEqual(+0450 * Scale, polygon[0].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[1].X); Assert.AreEqual(+0450 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[2].X); Assert.AreEqual(+0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[3].X); Assert.AreEqual(+0500 * Scale, polygon[3].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[4].X); Assert.AreEqual(-0500 * Scale, polygon[4].Y);
-            Assert.AreEqual(-0450 * Scale, polygon[5].X); Assert.AreEqual(-0500 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0450, +0450),
+                Scaled(+0500, +0450),
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(-0450, -0500));
         }
 
         [TestMethod]
@@ -2067,29 +2125,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0000, +0000),
-                    new DoublePoint(+0000, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0000)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0000, +0000),
+                    Scaled(+0000, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0000)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -2105,41 +2163,44 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygonPoints.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000, polygonPoints[0].X); Assert.AreEqual(+0000, polygonPoints[0].Y);
-            Assert.AreEqual(+0500, polygonPoints[1].X); Assert.AreEqual(+0000, polygonPoints[1].Y);
-            Assert.AreEqual(+0500, polygonPoints[2].X); Assert.AreEqual(+0500, polygonPoints[2].Y);
-            Assert.AreEqual(-0500, polygonPoints[3].X); Assert.AreEqual(+0500, polygonPoints[3].Y);
-            Assert.AreEqual(-0500, polygonPoints[4].X); Assert.AreEqual(-0500, polygonPoints[4].Y);
-            Assert.AreEqual(+0000, polygonPoints[5].X); Assert.AreEqual(-0500, polygonPoints[5].Y);
-            Assert.AreEqual(+0000, polygonPoints[6].X); Assert.AreEqual(-1000, polygonPoints[6].Y);
-            Assert.AreEqual(+1000, polygonPoints[7].X); Assert.AreEqual(-1000, polygonPoints[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +0000),
+                Scaled(+0500, +0000),
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0000, -0500),
+                Scaled(+0000, -1000),
+                Scaled(+1000, -1000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygonPoints.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0000, polygonPoints[0].X); Assert.AreEqual(-0500, polygonPoints[0].Y);
-            Assert.AreEqual(+0000, polygonPoints[1].X); Assert.AreEqual(-0400, polygonPoints[1].Y);
-            Assert.AreEqual(-0400, polygonPoints[2].X); Assert.AreEqual(-0400, polygonPoints[2].Y);
-            Assert.AreEqual(-0400, polygonPoints[3].X); Assert.AreEqual(+0400, polygonPoints[3].Y);
-            Assert.AreEqual(+0400, polygonPoints[4].X); Assert.AreEqual(+0400, polygonPoints[4].Y);
-            Assert.AreEqual(+0400, polygonPoints[5].X); Assert.AreEqual(+0000, polygonPoints[5].Y);
-            Assert.AreEqual(+0500, polygonPoints[6].X); Assert.AreEqual(+0000, polygonPoints[6].Y);
-            Assert.AreEqual(+0500, polygonPoints[7].X); Assert.AreEqual(-0500, polygonPoints[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0000, -0500),
+                Scaled(+0000, -0400),
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, +0000),
+                Scaled(+0500, +0000),
+                Scaled(+0500, -0500));
 
             polygon = solution[2];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygonPoints.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0400, polygonPoints[0].X); Assert.AreEqual(+0000, polygonPoints[0].Y);
-            Assert.AreEqual(+0000, polygonPoints[1].X); Assert.AreEqual(+0000, polygonPoints[1].Y);
-            Assert.AreEqual(+0000, polygonPoints[2].X); Assert.AreEqual(-0400, polygonPoints[2].Y);
-            Assert.AreEqual(+0400, polygonPoints[3].X); Assert.AreEqual(-0400, polygonPoints[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0400, +0000),
+                Scaled(+0000, +0000),
+                Scaled(+0000, -0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -2148,29 +2209,29 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0450, +0450),
-                    new DoublePoint(-0450, -1000),
-                    new DoublePoint(+1000, -1000),
-                    new DoublePoint(+1000, +0450)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0450, +0450),
+                    Scaled(-0450, -1000),
+                    Scaled(+1000, -1000),
+                    Scaled(+1000, +0450)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -2186,37 +2247,40 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(8, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+1000, polygonPoints[0].X); Assert.AreEqual(+0450, polygonPoints[0].Y);
-            Assert.AreEqual(+0500, polygonPoints[1].X); Assert.AreEqual(+0450, polygonPoints[1].Y);
-            Assert.AreEqual(+0500, polygonPoints[2].X); Assert.AreEqual(+0500, polygonPoints[2].Y);
-            Assert.AreEqual(-0500, polygonPoints[3].X); Assert.AreEqual(+0500, polygonPoints[3].Y);
-            Assert.AreEqual(-0500, polygonPoints[4].X); Assert.AreEqual(-0500, polygonPoints[4].Y);
-            Assert.AreEqual(-0450, polygonPoints[5].X); Assert.AreEqual(-0500, polygonPoints[5].Y);
-            Assert.AreEqual(-0450, polygonPoints[6].X); Assert.AreEqual(-1000, polygonPoints[6].Y);
-            Assert.AreEqual(+1000, polygonPoints[7].X); Assert.AreEqual(-1000, polygonPoints[7].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+1000, +0450),
+                Scaled(+0500, +0450),
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(-0450, -0500),
+                Scaled(-0450, -1000),
+                Scaled(+1000, -1000));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0450, polygonPoints[0].X); Assert.AreEqual(-0500, polygonPoints[0].Y);
-            Assert.AreEqual(-0450, polygonPoints[1].X); Assert.AreEqual(+0450, polygonPoints[1].Y);
-            Assert.AreEqual(+0500, polygonPoints[2].X); Assert.AreEqual(+0450, polygonPoints[2].Y);
-            Assert.AreEqual(+0500, polygonPoints[3].X); Assert.AreEqual(-0500, polygonPoints[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0450, -0500),
+                Scaled(-0450, +0450),
+                Scaled(+0500, +0450),
+                Scaled(+0500, -0500));
 
             polygon = solution[2];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0400, polygonPoints[0].X); Assert.AreEqual(+0400, polygonPoints[0].Y);
-            Assert.AreEqual(-0400, polygonPoints[1].X); Assert.AreEqual(+0400, polygonPoints[1].Y);
-            Assert.AreEqual(-0400, polygonPoints[2].X); Assert.AreEqual(-0400, polygonPoints[2].Y);
-            Assert.AreEqual(+0400, polygonPoints[3].X); Assert.AreEqual(-0400, polygonPoints[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0400, +0400),
+                Scaled(-0400, +0400),
+                Scaled(-0400, -0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -2225,32 +2289,32 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+03, +03),
-                    new DoublePoint(+08, +08),
-                    new DoublePoint(+06, +08),
-                    new DoublePoint(+06, +03),
-                    new DoublePoint(+02, +07),
-                    new DoublePoint(+01, +04)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+03, +03),
+                    Scaled(+08, +08),
+                    Scaled(+06, +08),
+                    Scaled(+06, +03),
+                    Scaled(+02, +07),
+                    Scaled(+01, +04)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+02, +04),
-                    new DoublePoint(+02, +05),
-                    new DoublePoint(+03, +05),
-                    new DoublePoint(+03, +04)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+02, +04),
+                    Scaled(+02, +05),
+                    Scaled(+03, +05),
+                    Scaled(+03, +04)
+                });
 
             var clip1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+01, +07),
-                    new DoublePoint(+01, +03),
-                    new DoublePoint(+08, +03),
-                    new DoublePoint(+08, +08),
-                    new DoublePoint(+01, +08)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+01, +07),
+                    Scaled(+01, +03),
+                    Scaled(+08, +03),
+                    Scaled(+08, +08),
+                    Scaled(+01, +08)
+                });
 
             var subject = new PolygonPath(new[] { subject1, subject2 });
             var clip = new PolygonPath(clip1);
@@ -2264,36 +2328,39 @@ namespace UnitTests
             Assert.IsTrue(GeometryHelper.NearZero(solution.Area * AreaScaleInverse - 10.5));
             Assert.AreEqual(3, solution.Count);
             var polygon = solution[0];
-            Assert.AreEqual(6, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+6.0 * Scale, polygon[0].X); Assert.AreEqual(+6.0 * Scale, polygon[0].Y);
-            Assert.AreEqual(+8.0 * Scale, polygon[1].X); Assert.AreEqual(+8.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(+6.0 * Scale, polygon[2].X); Assert.AreEqual(+8.0 * Scale, polygon[2].Y);
-            Assert.AreEqual(+6.0 * Scale, polygon[3].X); Assert.AreEqual(+6.0 * Scale, polygon[3].Y);
-            Assert.AreEqual(+4.5 * Scale, polygon[4].X); Assert.AreEqual(+4.5 * Scale, polygon[4].Y);
-            Assert.AreEqual(+6.0 * Scale, polygon[5].X); Assert.AreEqual(+3.0 * Scale, polygon[5].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+6.0, +6.0),
+                Scaled(+8.0, +8.0),
+                Scaled(+6.0, +8.0),
+                Scaled(+6.0, +6.0),
+                Scaled(+4.5, +4.5),
+                Scaled(+6.0, +3.0));
 
             polygon = solution[1];
-            Assert.AreEqual(4, polygon.Count);
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+04.5 * Scale, polygon[0].X); Assert.AreEqual(+04.5 * Scale, polygon[0].Y);
-            Assert.AreEqual(+02.0 * Scale, polygon[1].X); Assert.AreEqual(+07.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(+01.0 * Scale, polygon[2].X); Assert.AreEqual(+04.0 * Scale, polygon[2].Y);
-            Assert.AreEqual(+03.0 * Scale, polygon[3].X); Assert.AreEqual(+03.0 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+04.5, +04.5),
+                Scaled(+02.0, +07.0),
+                Scaled(+01.0, +04.0),
+                Scaled(+03.0, +03.0));
 
             polygon = solution[2];
-            Assert.AreEqual(4, polygon.Count);
             polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+02.0 * Scale, polygon[0].X); Assert.AreEqual(+04.0 * Scale, polygon[0].Y);
-            Assert.AreEqual(+02.0 * Scale, polygon[1].X); Assert.AreEqual(+05.0 * Scale, polygon[1].Y);
-            Assert.AreEqual(+03.0 * Scale, polygon[2].X); Assert.AreEqual(+05.0 * Scale, polygon[2].Y);
-            Assert.AreEqual(+03.0 * Scale, polygon[3].X); Assert.AreEqual(+04.0 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+02.0, +04.0),
+                Scaled(+02.0, +05.0),
+                Scaled(+03.0, +05.0),
+                Scaled(+03.0, +04.0));
         }
 
         [TestMethod]
@@ -2302,33 +2369,34 @@ namespace UnitTests
             var polygon = new Polygon(
                  new[]
                  {
-                    new DoublePoint(+00000000, -05000000),
-                    new DoublePoint(+00000000, -05000000),
-                    new DoublePoint(+05000000, -05000000),
-                    new DoublePoint(+05000000, +00000000),
-                    new DoublePoint(+05000000, +05000000),
-                    new DoublePoint(+00000000, +05000000),
-                    new DoublePoint(-05000000, +05000000),
-                    new DoublePoint(-05000000, +05000000),
-                    new DoublePoint(-05000000, +00000000),
-                    new DoublePoint(-05000000, -05000000),
-                    new DoublePoint(-05000000, -05000000),
-                    new DoublePoint(+00000000, -05000000),
-                    new DoublePoint(+00000000, -05000000)
-                 }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+00000000, -05000000),
+                    Scaled(+00000000, -05000000),
+                    Scaled(+05000000, -05000000),
+                    Scaled(+05000000, +00000000),
+                    Scaled(+05000000, +05000000),
+                    Scaled(+00000000, +05000000),
+                    Scaled(-05000000, +05000000),
+                    Scaled(-05000000, +05000000),
+                    Scaled(-05000000, +00000000),
+                    Scaled(-05000000, -05000000),
+                    Scaled(-05000000, -05000000),
+                    Scaled(+00000000, -05000000),
+                    Scaled(+00000000, -05000000)
+                 });
 
             Assert.AreEqual(100000000000000, polygon.Area * AreaScaleInverse);
 
             polygon.Simplify();
-            Assert.AreEqual(4, polygon.Count);
             var polygonPoints = FromScaledPolygon(polygon);
             Assert.AreEqual(100000000000000, polygon.Area * AreaScaleInverse);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+05000000 * Scale, polygon[0].X); Assert.AreEqual(-05000000 * Scale, polygon[0].Y);
-            Assert.AreEqual(+05000000 * Scale, polygon[1].X); Assert.AreEqual(+05000000 * Scale, polygon[1].Y);
-            Assert.AreEqual(-05000000 * Scale, polygon[2].X); Assert.AreEqual(+05000000 * Scale, polygon[2].Y);
-            Assert.AreEqual(-05000000 * Scale, polygon[3].X); Assert.AreEqual(-05000000 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+05000000, -05000000),
+                Scaled(+05000000, +05000000),
+                Scaled(-05000000, +05000000),
+                Scaled(-05000000, -05000000));
         }
 
         [TestMethod]
@@ -2337,20 +2405,20 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(+0400, +0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(+0400, +0400),
+                    Scaled(+0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, +0400)
+                });
 
             var clip1 = new Polygon();
 
@@ -2368,23 +2436,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[1].X); Assert.AreEqual(+0500 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0500, -0500));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -2393,20 +2463,20 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0400, +0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(+0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0400, +0400),
+                    Scaled(-0400, -0400),
+                    Scaled(+0400, -0400),
+                    Scaled(+0400, +0400)
+                });
 
             Assert.IsTrue(GeometryHelper.NearZero(subject1.Area * AreaScaleInverse - 1000000));
             Assert.IsTrue(GeometryHelper.NearZero(subject2.Area * AreaScaleInverse - 640000));
@@ -2426,23 +2496,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[1].X); Assert.AreEqual(+0500 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0500, -0500));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, -0400));
         }
 
         [TestMethod]
@@ -2451,27 +2523,27 @@ namespace UnitTests
             var subject1 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, +0500),
-                    new DoublePoint(-0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, -0500),
-                    new DoublePoint(+0500, +0500)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, +0500),
+                    Scaled(-0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, -0500),
+                    Scaled(+0500, +0500)
+                });
 
             var subject2 = new Polygon(
                 new[]
                 {
-                    new DoublePoint(-0400, +0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(-0400, -0400),
-                    new DoublePoint(+0300, -0400),
-                    new DoublePoint(-0300, -0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(+0400, -0400),
-                    new DoublePoint(+0400, +0400)
-                }.Select(p => new IntPoint(p * Scale)));
+                    Scaled(-0400, +0400),
+                    Scaled(-0400, -0400),
+                    Scaled(-0400, -0400),
+                    Scaled(+0300, -0400),
+                    Scaled(-0300, -0400),
+                    Scaled(+0400, -0400),
+                    Scaled(+0400, -0400),
+                    Scaled(+0400, -0400),
+                    Scaled(+0400, +0400)
+                });
 
             Assert.IsTrue(GeometryHelper.NearZero(subject1.Area * AreaScaleInverse - 1000000));
             Assert.IsTrue(GeometryHelper.NearZero(subject2.Area * AreaScaleInverse - 640000));
@@ -2491,23 +2563,25 @@ namespace UnitTests
 
             var polygon = solution[0];
             var polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(+0500 * Scale, polygon[0].X); Assert.AreEqual(+0500 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[1].X); Assert.AreEqual(+0500 * Scale, polygon[1].Y);
-            Assert.AreEqual(-0500 * Scale, polygon[2].X); Assert.AreEqual(-0500 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0500 * Scale, polygon[3].X); Assert.AreEqual(-0500 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(+0500, +0500),
+                Scaled(-0500, +0500),
+                Scaled(-0500, -0500),
+                Scaled(+0500, -0500));
 
             polygon = solution[1];
             polygonPoints = FromScaledPolygon(polygon);
-            Assert.AreEqual(4, polygon.Count);
             Assert.AreEqual(PolygonOrientation.Clockwise, polygon.Orientation);
             Assert.AreEqual(PolygonOrientation.Clockwise, GeometryHelper.GetOrientation(polygonPoints));
-            Assert.AreEqual(-0400 * Scale, polygon[0].X); Assert.AreEqual(-0400 * Scale, polygon[0].Y);
-            Assert.AreEqual(-0400 * Scale, polygon[1].X); Assert.AreEqual(+0400 * Scale, polygon[1].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[2].X); Assert.AreEqual(+0400 * Scale, polygon[2].Y);
-            Assert.AreEqual(+0400 * Scale, polygon[3].X); Assert.AreEqual(-0400 * Scale, polygon[3].Y);
+            AssertEqual(
+                polygon,
+                Scaled(-0400, -0400),
+                Scaled(-0400, +0400),
+                Scaled(+0400, +0400),
+                Scaled(+0400, -0400));
         }
 
 
@@ -2517,55 +2591,56 @@ namespace UnitTests
             var subject = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+01.0, +02.0),
-                    new DoublePoint(+03.0, +02.0),
-                    new DoublePoint(+04.0, +01.0),
-                    new DoublePoint(+05.0, +02.0),
-                    new DoublePoint(+07.0, +02.0),
-                    new DoublePoint(+06.0, +03.0),
-                    new DoublePoint(+07.0, +04.0),
-                    new DoublePoint(+05.0, +04.0),
-                    new DoublePoint(+04.0, +05.0),
-                    new DoublePoint(+03.0, +04.0),
-                    new DoublePoint(+01.0, +04.0),
-                    new DoublePoint(+02.0, +03.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+01.0, +02.0),
+                    Scaled(+03.0, +02.0),
+                    Scaled(+04.0, +01.0),
+                    Scaled(+05.0, +02.0),
+                    Scaled(+07.0, +02.0),
+                    Scaled(+06.0, +03.0),
+                    Scaled(+07.0, +04.0),
+                    Scaled(+05.0, +04.0),
+                    Scaled(+04.0, +05.0),
+                    Scaled(+03.0, +04.0),
+                    Scaled(+01.0, +04.0),
+                    Scaled(+02.0, +03.0)
+                }));
 
             var clip = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+01.0, +01.0),
-                    new DoublePoint(+03.0, +00.0),
-                    new DoublePoint(+05.0, +00.0),
-                    new DoublePoint(+07.0, +01.0),
-                    new DoublePoint(+08.0, +03.0),
-                    new DoublePoint(+08.0, +05.0),
-                    new DoublePoint(+07.0, +07.0),
-                    new DoublePoint(+05.0, +08.0),
-                    new DoublePoint(+03.0, +08.0),
-                    new DoublePoint(+01.0, +07.0),
-                    new DoublePoint(+00.0, +05.0),
-                    new DoublePoint(+00.0, +03.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+01.0, +01.0),
+                    Scaled(+03.0, +00.0),
+                    Scaled(+05.0, +00.0),
+                    Scaled(+07.0, +01.0),
+                    Scaled(+08.0, +03.0),
+                    Scaled(+08.0, +05.0),
+                    Scaled(+07.0, +07.0),
+                    Scaled(+05.0, +08.0),
+                    Scaled(+03.0, +08.0),
+                    Scaled(+01.0, +07.0),
+                    Scaled(+00.0, +05.0),
+                    Scaled(+00.0, +03.0)
+                }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Union, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(12, solution[0].Count);
             solution[0].OrderBottomLeftFirst();
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03.0 * Scale, +00.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +00.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +01.0 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +03.0 * Scale) - solution[0][3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +05.0 * Scale) - solution[0][4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +07.0 * Scale) - solution[0][5]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +08.0 * Scale) - solution[0][6]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03.0 * Scale, +08.0 * Scale) - solution[0][7]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+01.0 * Scale, +07.0 * Scale) - solution[0][8]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +05.0 * Scale) - solution[0][9]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +03.0 * Scale) - solution[0][10]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+01.0 * Scale, +01.0 * Scale) - solution[0][11]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+03.0, +00.0),
+                Scaled(+05.0, +00.0),
+                Scaled(+07.0, +01.0),
+                Scaled(+08.0, +03.0),
+                Scaled(+08.0, +05.0),
+                Scaled(+07.0, +07.0),
+                Scaled(+05.0, +08.0),
+                Scaled(+03.0, +08.0),
+                Scaled(+01.0, +07.0),
+                Scaled(+00.0, +05.0),
+                Scaled(+00.0, +03.0),
+                Scaled(+01.0, +01.0));
 
             solution = new PolygonPath();
 
@@ -2576,20 +2651,21 @@ namespace UnitTests
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(12, solution[0].Count);
             solution[0].OrderBottomLeftFirst();
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+04.0 * Scale, +01.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +02.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +02.0 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+06.0 * Scale, +03.0 * Scale) - solution[0][3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +04.0 * Scale) - solution[0][4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +04.0 * Scale) - solution[0][5]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+04.0 * Scale, +05.0 * Scale) - solution[0][6]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03.0 * Scale, +04.0 * Scale) - solution[0][7]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+01.0 * Scale, +04.0 * Scale) - solution[0][8]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02.0 * Scale, +03.0 * Scale) - solution[0][9]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+01.0 * Scale, +02.0 * Scale) - solution[0][10]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03.0 * Scale, +02.0 * Scale) - solution[0][11]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+04.0, +01.0),
+                Scaled(+05.0, +02.0),
+                Scaled(+07.0, +02.0),
+                Scaled(+06.0, +03.0),
+                Scaled(+07.0, +04.0),
+                Scaled(+05.0, +04.0),
+                Scaled(+04.0, +05.0),
+                Scaled(+03.0, +04.0),
+                Scaled(+01.0, +04.0),
+                Scaled(+02.0, +03.0),
+                Scaled(+01.0, +02.0),
+                Scaled(+03.0, +02.0));
         }
 
         [TestMethod]
@@ -2598,28 +2674,29 @@ namespace UnitTests
             var subject = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+08.0, +05.0),
-                    new DoublePoint(+12.0, +02.0),
-                    new DoublePoint(+12.0, +08.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+08.0, +05.0),
+                    Scaled(+12.0, +02.0),
+                    Scaled(+12.0, +08.0)
+                }));
 
             var clip = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+00.0, +00.0),
-                    new DoublePoint(+10.0, +00.0),
-                    new DoublePoint(+10.0, +10.0),
-                    new DoublePoint(+00.0, +10.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00.0, +00.0),
+                    Scaled(+10.0, +00.0),
+                    Scaled(+10.0, +10.0),
+                    Scaled(+00.0, +10.0)
+                }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +06.5 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +05.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +03.5 * Scale) - solution[0][2]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+10.0, +06.5),
+                Scaled(+08.0, +05.0),
+                Scaled(+10.0, +03.5));
 
             solution = new PolygonPath();
 
@@ -2630,10 +2707,11 @@ namespace UnitTests
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +06.5 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +05.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +03.5 * Scale) - solution[0][2]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+10.0, +06.5),
+                Scaled(+08.0, +05.0),
+                Scaled(+10.0, +03.5));
         }
 
         [TestMethod]
@@ -2642,30 +2720,31 @@ namespace UnitTests
             var subject = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+08.0, +05.0),
-                    new DoublePoint(+08.0, +05.0),
-                    new DoublePoint(+12.0, +02.0),
-                    new DoublePoint(+12.0, +08.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+08.0, +05.0),
+                    Scaled(+08.0, +05.0),
+                    Scaled(+12.0, +02.0),
+                    Scaled(+12.0, +08.0)
+                }));
 
             var clip = new PolygonPath(
                 new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+05.0, +00.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+10.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+05.0, +00.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +06.5 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +05.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +03.5 * Scale) - solution[0][2]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+10.0, +06.5),
+                Scaled(+08.0, +05.0),
+                Scaled(+10.0, +03.5));
         }
 
         [TestMethod]
@@ -2674,28 +2753,29 @@ namespace UnitTests
             var subject = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+00.0, +01.0),
-                    new DoublePoint(+02.0, +02.0),
-                    new DoublePoint(+00.0, +03.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00.0, +01.0),
+                    Scaled(+02.0, +02.0),
+                    Scaled(+00.0, +03.0)
+                }));
 
             var clip = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+00.0, +00.0),
-                    new DoublePoint(+05.0, +00.0),
-                    new DoublePoint(+05.0, +05.0),
-                    new DoublePoint(+00.0, +05.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00.0, +00.0),
+                    Scaled(+05.0, +00.0),
+                    Scaled(+05.0, +05.0),
+                    Scaled(+00.0, +05.0)
+                }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02.0 * Scale, +02.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +03.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +01.0 * Scale) - solution[0][2]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+02.0, +02.0),
+                Scaled(+00.0, +03.0),
+                Scaled(+00.0, +01.0));
         }
 
         [TestMethod]
@@ -2704,28 +2784,29 @@ namespace UnitTests
             var subject = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+05.0, +05.0),
-                    new DoublePoint(+05.0, +00.0),
-                    new DoublePoint(+02.0, +03.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+05.0, +05.0),
+                    Scaled(+05.0, +00.0),
+                    Scaled(+02.0, +03.0)
+                }));
 
             var clip = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+00.0, +00.0),
-                    new DoublePoint(+05.0, +00.0),
-                    new DoublePoint(+05.0, +05.0),
-                    new DoublePoint(+00.0, +05.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00.0, +00.0),
+                    Scaled(+05.0, +00.0),
+                    Scaled(+05.0, +05.0),
+                    Scaled(+00.0, +05.0)
+                }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +05.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02.0 * Scale, +03.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +00.0 * Scale) - solution[0][2]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+05.0, +05.0),
+                Scaled(+02.0, +03.0),
+                Scaled(+05.0, +00.0));
         }
 
         [TestMethod]
@@ -2734,19 +2815,19 @@ namespace UnitTests
             var subject = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+10.1, +05.0),
-                    new DoublePoint(+12.0, +02.0),
-                    new DoublePoint(+12.0, +08.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+10.1, +05.0),
+                    Scaled(+12.0, +02.0),
+                    Scaled(+12.0, +08.0)
+                }));
 
             var clip = new PolygonPath(
                 new Polygon(new[]
                 {
-                    new DoublePoint(+00.0, +00.0),
-                    new DoublePoint(+10.0, +00.0),
-                    new DoublePoint(+10.0, +10.0),
-                    new DoublePoint(+00.0, +10.0)
-                }.Select(p => new IntPoint(p * Scale))));
+                    Scaled(+00.0, +00.0),
+                    Scaled(+10.0, +00.0),
+                    Scaled(+10.0, +10.0),
+                    Scaled(+00.0, +10.0)
+                }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -2759,27 +2840,28 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+03.0, +05.0),
-                new DoublePoint(+08.0, +02.0),
-                new DoublePoint(+08.0, +08.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+03.0, +05.0),
+                Scaled(+08.0, +02.0),
+                Scaled(+08.0, +08.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+10.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +08.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03.0 * Scale, +05.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +02.0 * Scale) - solution[0][2]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+08.0, +08.0),
+                Scaled(+03.0, +05.0),
+                Scaled(+08.0, +02.0));
         }
 
         [TestMethod]
@@ -2787,29 +2869,30 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+10.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+10.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(4, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +10.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +10.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +00.0 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +00.0 * Scale) - solution[0][3]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0),
+                Scaled(+00.0, +00.0),
+                Scaled(+10.0, +00.0));
         }
 
         [TestMethod]
@@ -2817,23 +2900,23 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +60.0),
-                new DoublePoint(+00.0, +50.0),
-                new DoublePoint(+30.0, +20.0),
-                new DoublePoint(+60.0, +50.0),
-                new DoublePoint(+60.0, +60.0)
-            }.Select(p => new IntPoint(p * Scale)))
+                Scaled(+00.0, +60.0),
+                Scaled(+00.0, +50.0),
+                Scaled(+30.0, +20.0),
+                Scaled(+60.0, +50.0),
+                Scaled(+60.0, +60.0)
+            })
             {
                 IsClosed = false
             });
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+10.0, +50.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+50.0, +00.0),
-                new DoublePoint(+50.0, +50.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+10.0, +50.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+50.0, +00.0),
+                Scaled(+50.0, +50.0)
+            }));
 
             var tree = new PolygonTree();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, tree));
@@ -2844,11 +2927,12 @@ namespace UnitTests
 
             var polygon = solution[0];
 
-            Assert.AreEqual(3, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +40.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+30.0 * Scale, +20.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+50.0 * Scale, +40.0 * Scale) - polygon[2]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.0, +40.0),
+                Scaled(+30.0, +20.0),
+                Scaled(+50.0, +40.0));
         }
 
         [TestMethod]
@@ -2856,20 +2940,20 @@ namespace UnitTests
         {
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +60.0),
-                new DoublePoint(+00.0, +50.0),
-                new DoublePoint(+30.0, +20.0),
-                new DoublePoint(+60.0, +50.0),
-                new DoublePoint(+60.0, +60.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +60.0),
+                Scaled(+00.0, +50.0),
+                Scaled(+30.0, +20.0),
+                Scaled(+60.0, +50.0),
+                Scaled(+60.0, +60.0)
+            }));
 
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+10.0, +50.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+50.0, +00.0),
-                new DoublePoint(+50.0, +50.0)
-            }.Select(p => new IntPoint(p * Scale)))
+                Scaled(+10.0, +50.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+50.0, +00.0),
+                Scaled(+50.0, +50.0)
+            })
             {
                 IsClosed = false
             });
@@ -2881,18 +2965,20 @@ namespace UnitTests
             Assert.AreEqual(2, solution.Count);
 
             var polygon = solution[0];
-            Assert.AreEqual(2, polygon.Count);
             polygon.OrderBottomLeftFirst();
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +40.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +50.0 * Scale) - polygon[1]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.0, +40.0),
+                Scaled(+10.0, +50.0));
 
             polygon = solution[1];
-            Assert.AreEqual(2, polygon.Count);
             polygon.OrderBottomLeftFirst();
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+50.0 * Scale, +40.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+50.0 * Scale, +50.0 * Scale) - polygon[1]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+50.0, +40.0),
+                Scaled(+50.0, +50.0));
         }
 
         [TestMethod]
@@ -2900,23 +2986,23 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, -10.0),
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+30.0, +30.0),
-                new DoublePoint(+60.0, +00.0),
-                new DoublePoint(+60.0, -10.0)
-            }.Select(p => new IntPoint(p * Scale)))
+                Scaled(+00.0, -10.0),
+                Scaled(+00.0, +00.0),
+                Scaled(+30.0, +30.0),
+                Scaled(+60.0, +00.0),
+                Scaled(+60.0, -10.0)
+            })
             {
                 IsClosed = false
             });
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+10.0, +50.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+50.0, +00.0),
-                new DoublePoint(+50.0, +50.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+10.0, +50.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+50.0, +00.0),
+                Scaled(+50.0, +50.0)
+            }));
 
             var tree = new PolygonTree();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, tree));
@@ -2926,12 +3012,12 @@ namespace UnitTests
             Assert.AreEqual(1, solution.Count);
 
             var polygon = solution[0];
-
-            Assert.AreEqual(3, polygon.Count);
             Assert.AreEqual(PolygonOrientation.CounterClockwise, polygon.Orientation);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+50.0 * Scale, +10.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+30.0 * Scale, +30.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +10.0 * Scale) - polygon[2]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+50.0, +10.0),
+                Scaled(+30.0, +30.0),
+                Scaled(+10.0, +10.0));
         }
 
         [TestMethod]
@@ -2939,19 +3025,19 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+10.0, +50.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+50.0, +00.0),
-                new DoublePoint(+50.0, +50.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+10.0, +50.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+50.0, +00.0),
+                Scaled(+50.0, +50.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +20.0),
-                new DoublePoint(+00.0, +30.0),
-                new DoublePoint(+60.0, +30.0),
-                new DoublePoint(+60.0, +20.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +20.0),
+                Scaled(+00.0, +30.0),
+                Scaled(+60.0, +30.0),
+                Scaled(+60.0, +20.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -2961,11 +3047,12 @@ namespace UnitTests
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
 
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +20.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+50.0 * Scale, +20.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+50.0 * Scale, +30.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +30.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.0, +20.0),
+                Scaled(+50.0, +20.0),
+                Scaled(+50.0, +30.0),
+                Scaled(+10.0, +30.0));
         }
 
         [TestMethod]
@@ -2973,29 +3060,30 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+12.0, +00.0),
-                new DoublePoint(+12.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+12.0, +00.0),
+                Scaled(+12.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+10.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(4, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +10.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +10.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +00.0 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +00.0 * Scale) - solution[0][3]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+10.0, +10.0),
+                Scaled(+00.0, +10.0),
+                Scaled(+00.0, +00.0),
+                Scaled(+10.0, +00.0));
         }
 
         [TestMethod]
@@ -3003,35 +3091,37 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(-020, +020),
-                new DoublePoint(+020, +020),
-                new DoublePoint(-005, +050),
-                new DoublePoint(+020, +080),
-                new DoublePoint(-020, +080)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(-020, +020),
+                Scaled(+020, +020),
+                Scaled(-005, +050),
+                Scaled(+020, +080),
+                Scaled(-020, +080)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+000, +000),
-                new DoublePoint(+100, +000),
-                new DoublePoint(+100, +100),
-                new DoublePoint(+000, +100)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+000, +000),
+                Scaled(+100, +000),
+                Scaled(+100, +100),
+                Scaled(+000, +100)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(2, solution.Count);
-
-            Assert.AreEqual(3, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+020 * Scale, +080 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+000 * Scale, +080 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+000 * Scale, +056 * Scale) - solution[0][2]).Length));
-
-            Assert.AreEqual(3, solution[1].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+000 * Scale, +044 * Scale) - solution[1][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+000 * Scale, +020 * Scale) - solution[1][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+020 * Scale, +020 * Scale) - solution[1][2]).Length));
+    
+            AssertEqual(
+                solution[0],
+                Scaled(+020, +080),
+                Scaled(+000, +080),
+                Scaled(+000, +056));
+            
+            AssertEqual(
+                solution[1],
+                Scaled(+000, +044),
+                Scaled(+000, +020),
+                Scaled(+020, +020));
         }
 
         [TestMethod]
@@ -3039,42 +3129,43 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+020, +020),
-                new DoublePoint(+120, +020),
-                new DoublePoint(+120, +060),
-                new DoublePoint(+020, +060)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+020, +020),
+                Scaled(+120, +020),
+                Scaled(+120, +060),
+                Scaled(+020, +060)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+000, +000),
-                new DoublePoint(+040, +000),
-                new DoublePoint(+050, +040),
-                new DoublePoint(+060, +000),
-                new DoublePoint(+070, +000),
-                new DoublePoint(+080, +040),
-                new DoublePoint(+090, +000),
-                new DoublePoint(+100, +000),
-                new DoublePoint(+100, +100),
-                new DoublePoint(+000, +100)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+000, +000),
+                Scaled(+040, +000),
+                Scaled(+050, +040),
+                Scaled(+060, +000),
+                Scaled(+070, +000),
+                Scaled(+080, +040),
+                Scaled(+090, +000),
+                Scaled(+100, +000),
+                Scaled(+100, +100),
+                Scaled(+000, +100)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
 
-            Assert.AreEqual(10, solution[0].Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+100 * Scale, +060 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+020 * Scale, +060 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+020 * Scale, +020 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+045 * Scale, +020 * Scale) - solution[0][3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+050 * Scale, +040 * Scale) - solution[0][4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+055 * Scale, +020 * Scale) - solution[0][5]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+075 * Scale, +020 * Scale) - solution[0][6]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+080 * Scale, +040 * Scale) - solution[0][7]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+085 * Scale, +020 * Scale) - solution[0][8]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+100 * Scale, +020 * Scale) - solution[0][9]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+100, +060),
+                Scaled(+020, +060),
+                Scaled(+020, +020),
+                Scaled(+045, +020),
+                Scaled(+050, +040),
+                Scaled(+055, +020),
+                Scaled(+075, +020),
+                Scaled(+080, +040),
+                Scaled(+085, +020),
+                Scaled(+100, +020));
         }
 
         [TestMethod]
@@ -3082,44 +3173,44 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+13.0, +02.0),
-                new DoublePoint(+15.0, +03.0),
-                new DoublePoint(+15.0, +06.0),
-                new DoublePoint(+16.0, +09.0),
-                new DoublePoint(+13.0, +13.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+13.0, +02.0),
+                Scaled(+15.0, +03.0),
+                Scaled(+15.0, +06.0),
+                Scaled(+16.0, +09.0),
+                Scaled(+13.0, +13.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+19.0, +08.0),
-                new DoublePoint(+10.0, +01.0),
-                new DoublePoint(+10.0, +03.0),
-                new DoublePoint(+03.0, +03.0),
-                new DoublePoint(+03.0, +15.0),
-                new DoublePoint(+17.0, +10.0),
-                new DoublePoint(+08.0, +10.0),
-                new DoublePoint(+08.0, +08.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+19.0, +08.0),
+                Scaled(+10.0, +01.0),
+                Scaled(+10.0, +03.0),
+                Scaled(+03.0, +03.0),
+                Scaled(+03.0, +15.0),
+                Scaled(+17.0, +10.0),
+                Scaled(+08.0, +10.0),
+                Scaled(+08.0, +08.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(2, solution.Count);
 
-            var polygon = solution[0];
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+15.25 * Scale, +10.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+14.6097561 * Scale, +10.8536585 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +11.42857145 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +10.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+15.25, +10.0),
+                Scaled(+14.6097561, +10.8536585),
+                Scaled(+13.0, +11.42857145),
+                Scaled(+13.0 , +10.0));
 
-            polygon = solution[1];
-            Assert.AreEqual(5, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+15.0 * Scale, +4.8888889 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+15.0 * Scale, +06.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+15.6666667 * Scale, +08.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +08.0 * Scale) - polygon[3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +3.3333333 * Scale) - polygon[4]).Length));
+            AssertEqual(
+                solution[1],
+                Scaled(+15.0, +4.8888889),
+                Scaled(+15.0, +06.0),
+                Scaled(+15.6666667, +08.0),
+                Scaled(+13.0, +08.0),
+                Scaled(+13.0, +3.3333333));
         }
 
         [TestMethod]
@@ -3127,41 +3218,41 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+06.0, +11.0),
-                new DoublePoint(+22.0, +11.0),
-                new DoublePoint(+22.0, +01.0),
-                new DoublePoint(+12.0, +01.0),
-                new DoublePoint(+12.0, +06.0),
-                new DoublePoint(+06.0, +06.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+06.0, +11.0),
+                Scaled(+22.0, +11.0),
+                Scaled(+22.0, +01.0),
+                Scaled(+12.0, +01.0),
+                Scaled(+12.0, +06.0),
+                Scaled(+06.0, +06.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+19.0, +08.0),
-                new DoublePoint(+10.0, +01.0),
-                new DoublePoint(+10.0, +03.0),
-                new DoublePoint(+03.0, +03.0),
-                new DoublePoint(+03.0, +15.0),
-                new DoublePoint(+17.0, +10.0),
-                new DoublePoint(+08.0, +10.0),
-                new DoublePoint(+08.0, +08.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+19.0, +08.0),
+                Scaled(+10.0, +01.0),
+                Scaled(+10.0, +03.0),
+                Scaled(+03.0, +03.0),
+                Scaled(+03.0, +15.0),
+                Scaled(+17.0, +10.0),
+                Scaled(+08.0, +10.0),
+                Scaled(+08.0, +08.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.AreEqual(9, solution[0].Count);
-
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+19.0 * Scale, +08.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +08.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+08.0 * Scale, +10.0 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+17.0 * Scale, +10.0 * Scale) - solution[0][3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+14.2 * Scale, +11.0 * Scale) - solution[0][4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+06.0 * Scale, +11.0 * Scale) - solution[0][5]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+06.0 * Scale, +06.0 * Scale) - solution[0][6]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+12.0 * Scale, +06.0 * Scale) - solution[0][7]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+12.0 * Scale, +2.5555556 * Scale) - solution[0][8]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+19.0, +08.0),
+                Scaled(+08.0, +08.0),
+                Scaled(+08.0, +10.0),
+                Scaled(+17.0, +10.0),
+                Scaled(+14.2, +11.0),
+                Scaled(+06.0, +11.0),
+                Scaled(+06.0, +06.0),
+                Scaled(+12.0, +06.0),
+                Scaled(+12.0, +2.5555556));
         }
 
         [TestMethod]
@@ -3169,18 +3260,18 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+03.0, +06.0),
-                new DoublePoint(+05.0, +03.0),
-                new DoublePoint(+01.0, +03.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+03.0, +06.0),
+                Scaled(+05.0, +03.0),
+                Scaled(+01.0, +03.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +06.0),
-                new DoublePoint(+06.0, +06.0),
-                new DoublePoint(+06.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +06.0),
+                Scaled(+06.0, +06.0),
+                Scaled(+06.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3193,19 +3284,19 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+06.0, +10.0),
-                new DoublePoint(+06.0, +13.0),
-                new DoublePoint(+08.0, +13.0),
-                new DoublePoint(+08.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+06.0, +10.0),
+                Scaled(+06.0, +13.0),
+                Scaled(+08.0, +13.0),
+                Scaled(+08.0, +10.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +06.0),
-                new DoublePoint(+06.0, +06.0),
-                new DoublePoint(+06.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +06.0),
+                Scaled(+06.0, +06.0),
+                Scaled(+06.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3218,19 +3309,19 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+06.0, +09.0),
-                new DoublePoint(+09.0, +09.0),
-                new DoublePoint(+09.0, +07.0),
-                new DoublePoint(+06.0, +07.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+06.0, +09.0),
+                Scaled(+09.0, +09.0),
+                Scaled(+09.0, +07.0),
+                Scaled(+06.0, +07.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +06.0),
-                new DoublePoint(+06.0, +06.0),
-                new DoublePoint(+06.0, +10.0),
-                new DoublePoint(+00.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +06.0),
+                Scaled(+06.0, +06.0),
+                Scaled(+06.0, +10.0),
+                Scaled(+00.0, +10.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3243,28 +3334,30 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +04.0),
-                new DoublePoint(+04.0, +04.0),
-                new DoublePoint(+04.0, +00.0),
-                new DoublePoint(+00.0, +00.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +04.0),
+                Scaled(+04.0, +04.0),
+                Scaled(+04.0, +00.0),
+                Scaled(+00.0, +00.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(-02.0, +01.0),
-                new DoublePoint(-02.0, +03.0),
-                new DoublePoint(+06.0, +03.0),
-                new DoublePoint(+06.0, +01.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(-02.0, +01.0),
+                Scaled(-02.0, +03.0),
+                Scaled(+06.0, +03.0),
+                Scaled(+06.0, +01.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
 
             Assert.AreEqual(1, solution.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+04.0 * Scale, +03.0 * Scale) - solution[0][0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +03.0 * Scale) - solution[0][1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00.0 * Scale, +01.0 * Scale) - solution[0][2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+04.0 * Scale, +01.0 * Scale) - solution[0][3]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+04.0, +03.0),
+                Scaled(+00.0, +03.0),
+                Scaled(+00.0, +01.0),
+                Scaled(+04.0, +01.0));
         }
 
         [TestMethod]
@@ -3272,33 +3365,33 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+06.0, +02.0),
-                new DoublePoint(+08.0, +04.0),
-                new DoublePoint(+10.0, +04.0),
-                new DoublePoint(+11.0, +03.0),
-                new DoublePoint(+11.0, +01.0),
-                new DoublePoint(+13.0, +01.0),
-                new DoublePoint(+13.0, +06.0),
-                new DoublePoint(+10.0, +08.0),
-                new DoublePoint(+09.0, +08.0),
-                new DoublePoint(+09.0, +03.0),
-                new DoublePoint(+08.0, +05.0),
-                new DoublePoint(+02.0, +03.0),
-                new DoublePoint(+02.0, +08.0),
-                new DoublePoint(+07.0, +08.0),
-                new DoublePoint(+05.0, +06.0),
-                new DoublePoint(+06.0, +04.0),
-                new DoublePoint(+03.0, +04.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+06.0, +02.0),
+                Scaled(+08.0, +04.0),
+                Scaled(+10.0, +04.0),
+                Scaled(+11.0, +03.0),
+                Scaled(+11.0, +01.0),
+                Scaled(+13.0, +01.0),
+                Scaled(+13.0, +06.0),
+                Scaled(+10.0, +08.0),
+                Scaled(+09.0, +08.0),
+                Scaled(+09.0, +03.0),
+                Scaled(+08.0, +05.0),
+                Scaled(+02.0, +03.0),
+                Scaled(+02.0, +08.0),
+                Scaled(+07.0, +08.0),
+                Scaled(+05.0, +06.0),
+                Scaled(+06.0, +04.0),
+                Scaled(+03.0, +04.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+14.0, +08.0),
-                new DoublePoint(+14.0, +11.0),
-                new DoublePoint(+03.0, +11.0),
-                new DoublePoint(+03.0, +09.0),
-                new DoublePoint(+08.0, +07.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+14.0, +08.0),
+                Scaled(+14.0, +11.0),
+                Scaled(+03.0, +11.0),
+                Scaled(+03.0, +09.0),
+                Scaled(+08.0, +07.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3307,18 +3400,20 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+09.0 * Scale, +07.1666667 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.8 * Scale, +07.4666667 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +08.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+09.0 * Scale, +08.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+09.0, +07.1666667),
+                Scaled(+10.8, +07.4666667),
+                Scaled(+10.0, +08.0),
+                Scaled(+09.0, +08.0));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+06.5714286 * Scale, +07.5714286 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +08.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.5 * Scale, +08.0 * Scale) - polygon[2]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+06.5714286, +07.5714286),
+                Scaled(+07.0, +08.0),
+                Scaled(+05.5, +08.0));
         }
 
         [TestMethod]
@@ -3326,43 +3421,43 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +00.0),
-                new DoublePoint(+04.0, +04.0),
-                new DoublePoint(+04.0, +14.0),
-                new DoublePoint(+07.0, +14.0),
-                new DoublePoint(+07.0, +16.0),
-                new DoublePoint(+00.0, +16.0),
-                new DoublePoint(+00.0, +13.0),
-                new DoublePoint(+07.0, +07.0),
-                new DoublePoint(+14.0, +14.0),
-                new DoublePoint(+11.0, +14.0),
-                new DoublePoint(+11.0, +00.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +00.0),
+                Scaled(+04.0, +04.0),
+                Scaled(+04.0, +14.0),
+                Scaled(+07.0, +14.0),
+                Scaled(+07.0, +16.0),
+                Scaled(+00.0, +16.0),
+                Scaled(+00.0, +13.0),
+                Scaled(+07.0, +07.0),
+                Scaled(+14.0, +14.0),
+                Scaled(+11.0, +14.0),
+                Scaled(+11.0, +00.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+07.0, +09.0),
-                new DoublePoint(+12.0, +09.0),
-                new DoublePoint(+07.0, +14.0),
-                new DoublePoint(+07.0, +13.0),
-                new DoublePoint(+10.0, +13.0),
-                new DoublePoint(+10.0, +15.0),
-                new DoublePoint(+15.0, +15.0),
-                new DoublePoint(+15.0, +13.0),
-                new DoublePoint(+11.0, +13.0),
-                new DoublePoint(+08.0, +16.0),
-                new DoublePoint(+17.0, +16.0),
-                new DoublePoint(+17.0, +12.0),
-                new DoublePoint(+11.0, +12.0),
-                new DoublePoint(+11.0, +11.0),
-                new DoublePoint(+12.0, +12.0),
-                new DoublePoint(+13.0, +11.0),
-                new DoublePoint(+19.0, +11.0),
-                new DoublePoint(+19.0, +17.0),
-                new DoublePoint(+06.0, +17.0),
-                new DoublePoint(+06.0, +12.0),
-                new DoublePoint(+07.0, +12.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+07.0, +09.0),
+                Scaled(+12.0, +09.0),
+                Scaled(+07.0, +14.0),
+                Scaled(+07.0, +13.0),
+                Scaled(+10.0, +13.0),
+                Scaled(+10.0, +15.0),
+                Scaled(+15.0, +15.0),
+                Scaled(+15.0, +13.0),
+                Scaled(+11.0, +13.0),
+                Scaled(+08.0, +16.0),
+                Scaled(+17.0, +16.0),
+                Scaled(+17.0, +12.0),
+                Scaled(+11.0, +12.0),
+                Scaled(+11.0, +11.0),
+                Scaled(+12.0, +12.0),
+                Scaled(+13.0, +11.0),
+                Scaled(+19.0, +11.0),
+                Scaled(+19.0, +17.0),
+                Scaled(+06.0, +17.0),
+                Scaled(+06.0, +12.0),
+                Scaled(+07.0, +12.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3374,34 +3469,38 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+09.0 * Scale, +09.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +09.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +10.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.5 * Scale, +10.5 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+09.0, +09.0),
+                Scaled(+11.0, +09.0),
+                Scaled(+11.0, +10.0),
+                Scaled(+10.5, +10.5));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(3, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +11.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+12.0 * Scale, +12.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +12.0 * Scale) - polygon[2]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+11.0, +11.0),
+                Scaled(+12.0, +12.0),
+                Scaled(+11.0, +12.0));
 
             polygon = solution[2];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +13.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +13.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+14.0 * Scale, +14.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +14.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+11.0, +13.0),
+                Scaled(+13.0, +13.0),
+                Scaled(+14.0, +14.0),
+                Scaled(+11.0, +14.0));
 
             polygon = solution[3];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+06.0 * Scale, +14.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +14.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +16.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+06.0 * Scale, +16.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+06.0, +14.0),
+                Scaled(+07.0, +14.0),
+                Scaled(+07.0, +16.0),
+                Scaled(+06.0, +16.0));
         }
 
         [TestMethod]
@@ -3409,21 +3508,21 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00000000, +00000000),
-                new DoublePoint(+01000000, +01000000),
-                new DoublePoint(+03000000, +01000000),
-                new DoublePoint(+04000000, +00000000),
-                new DoublePoint(+04000000, +02000000),
-                new DoublePoint(+00000000, +02000000)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00000000, +00000000),
+                Scaled(+01000000, +01000000),
+                Scaled(+03000000, +01000000),
+                Scaled(+04000000, +00000000),
+                Scaled(+04000000, +02000000),
+                Scaled(+00000000, +02000000)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00500000, +00000000),
-                new DoublePoint(+03500000, +00000000),
-                new DoublePoint(+03500000, +03000000),
-                new DoublePoint(+00500000, +03000000)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00500000, +00000000),
+                Scaled(+03500000, +00000000),
+                Scaled(+03500000, +03000000),
+                Scaled(+00500000, +03000000)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3432,14 +3531,14 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-
-            Assert.AreEqual(6, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00500000, +00500000) * Scale - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+01000000, +01000000) * Scale - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03000000, +01000000) * Scale - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03500000, +00500000) * Scale - polygon[3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03500000, +02000000) * Scale - polygon[4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00500000, +02000000) * Scale - polygon[5]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+00500000, +00500000),
+                Scaled(+01000000, +01000000),
+                Scaled(+03000000, +01000000),
+                Scaled(+03500000, +00500000),
+                Scaled(+03500000, +02000000),
+                Scaled(+00500000, +02000000));
         }
 
         [TestMethod]
@@ -3447,20 +3546,20 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00000000, +00000000),
-                new DoublePoint(+01000000, +01000000),
-                new DoublePoint(+03000000, +01000000),
-                new DoublePoint(+04000000, +02000000),
-                new DoublePoint(+00000000, +02000000)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00000000, +00000000),
+                Scaled(+01000000, +01000000),
+                Scaled(+03000000, +01000000),
+                Scaled(+04000000, +02000000),
+                Scaled(+00000000, +02000000)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00500000, +00000000),
-                new DoublePoint(+03500000, +00000000),
-                new DoublePoint(+03500000, +03000000),
-                new DoublePoint(+00500000, +03000000)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00500000, +00000000),
+                Scaled(+03500000, +00000000),
+                Scaled(+03500000, +03000000),
+                Scaled(+00500000, +03000000)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3469,14 +3568,14 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-
-            Assert.AreEqual(6, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00500000, +00500000) * Scale - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+01000000, +01000000) * Scale - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03000000, +01000000) * Scale - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03500000, +01500000) * Scale - polygon[3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03500000, +02000000) * Scale - polygon[4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+00500000, +02000000) * Scale - polygon[5]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+00500000, +00500000),
+                Scaled(+01000000, +01000000),
+                Scaled(+03000000, +01000000),
+                Scaled(+03500000, +01500000),
+                Scaled(+03500000, +02000000),
+                Scaled(+00500000, +02000000));
         }
 
         [TestMethod]
@@ -3484,24 +3583,24 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00000000, +00000000),
-                new DoublePoint(+06000000, +00000000),
-                new DoublePoint(+06000000, +04000000),
-                new DoublePoint(+05000000, +03000000),
-                new DoublePoint(+04000000, +04000000),
-                new DoublePoint(+03000000, +03000000),
-                new DoublePoint(+02000000, +04000000),
-                new DoublePoint(+01000000, +03000000),
-                new DoublePoint(+00000000, +04000000)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00, +00),
+                Scaled(+06, +00),
+                Scaled(+06, +04),
+                Scaled(+05, +03),
+                Scaled(+04, +04),
+                Scaled(+03, +03),
+                Scaled(+02, +04),
+                Scaled(+01, +03),
+                Scaled(+00, +04)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+02000000, +00000000),
-                new DoublePoint(+04000000, +00000000),
-                new DoublePoint(+04000000, +04000000),
-                new DoublePoint(+02000000, +04000000)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+02, +00),
+                Scaled(+04, +00),
+                Scaled(+04, +04),
+                Scaled(+02, +04)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3510,13 +3609,13 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-
-            Assert.AreEqual(5, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02000000, +00000000) * Scale - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+04000000, +00000000) * Scale - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+04000000, +04000000) * Scale - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+03000000, +03000000) * Scale - polygon[3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02000000, +04000000) * Scale - polygon[4]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+02, +00),
+                Scaled(+04, +00),
+                Scaled(+04, +04),
+                Scaled(+03, +03),
+                Scaled(+02, +04));
         }
 
         [TestMethod]
@@ -3524,19 +3623,19 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+02.0, +02.0),
-                new DoublePoint(+12.0, +02.0),
-                new DoublePoint(+12.0, +12.0),
-                new DoublePoint(+02.0, +12.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+02.0, +02.0),
+                Scaled(+12.0, +02.0),
+                Scaled(+12.0, +12.0),
+                Scaled(+02.0, +12.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +07.0),
-                new DoublePoint(+07.0, +00.0),
-                new DoublePoint(+14.0, +07.0),
-                new DoublePoint(+07.0, +14.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +07.0),
+                Scaled(+07.0, +00.0),
+                Scaled(+14.0, +07.0),
+                Scaled(+07.0, +14.0)
+            }));
 
             var solution = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, solution));
@@ -3545,15 +3644,16 @@ namespace UnitTests
 
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
-            Assert.AreEqual(8, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +02.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+09.0 * Scale, +02.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+12.0 * Scale, +05.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+12.0 * Scale, +09.0 * Scale) - polygon[3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+09.0 * Scale, +12.0 * Scale) - polygon[4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +12.0 * Scale) - polygon[5]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02.0 * Scale, +09.0 * Scale) - polygon[6]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+02.0 * Scale, +05.0 * Scale) - polygon[7]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+05.0, +02.0),
+                Scaled(+09.0, +02.0),
+                Scaled(+12.0, +05.0),
+                Scaled(+12.0, +09.0),
+                Scaled(+09.0, +12.0),
+                Scaled(+05.0, +12.0),
+                Scaled(+02.0, +09.0),
+                Scaled(+02.0, +05.0));
         }
 
         [TestMethod]
@@ -3561,35 +3661,35 @@ namespace UnitTests
         {
             var subject1 = new Polygon(new[]
             {
-                new DoublePoint(+05.0, +05.0),
-                new DoublePoint(+10.0, +00.0),
-                new DoublePoint(+15.0, +05.0),
-                new DoublePoint(+10.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale)));
+                Scaled(+05.0, +05.0),
+                Scaled(+10.0, +00.0),
+                Scaled(+15.0, +05.0),
+                Scaled(+10.0, +10.0)
+            });
 
             var subject2 = new Polygon(new[]
             {
-                new DoublePoint(+07.0, +05.0),
-                new DoublePoint(+10.0, +02.0),
-                new DoublePoint(+13.0, +05.0),
-                new DoublePoint(+10.0, +08.0)
-            }.Select(p => new IntPoint(p * Scale)));
+                Scaled(+07.0, +05.0),
+                Scaled(+10.0, +02.0),
+                Scaled(+13.0, +05.0),
+                Scaled(+10.0, +08.0)
+            });
 
             var subject3 = new Polygon(new[]
             {
-                new DoublePoint(+09.0, +05.0),
-                new DoublePoint(+10.0, +04.0),
-                new DoublePoint(+11.0, +05.0),
-                new DoublePoint(+10.0, +06.0)
-            }.Select(p => new IntPoint(p * Scale)));
+                Scaled(+09.0, +05.0),
+                Scaled(+10.0, +04.0),
+                Scaled(+11.0, +05.0),
+                Scaled(+10.0, +06.0)
+            });
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+05.0, +00.0),
-                new DoublePoint(+15.0, +00.0),
-                new DoublePoint(+15.0, +10.0),
-                new DoublePoint(+05.0, +10.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+05.0, +00.0),
+                Scaled(+15.0, +00.0),
+                Scaled(+15.0, +10.0),
+                Scaled(+05.0, +10.0)
+            }));
 
             var subject = new PolygonPath(
                 new[]
@@ -3607,29 +3707,32 @@ namespace UnitTests
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
             Assert.AreEqual(polygon.Orientation, PolygonOrientation.CounterClockwise);
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +00.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+15.0 * Scale, +05.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +10.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+05.0 * Scale, +05.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.0, +00.0),
+                Scaled(+15.0, +05.0),
+                Scaled(+10.0, +10.0),
+                Scaled(+05.0, +05.0));
 
             polygon = solution[1];
             polygon.OrderBottomLeftFirst();
             Assert.AreEqual(polygon.Orientation, PolygonOrientation.Clockwise);
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +02.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +05.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +08.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +05.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.0, +02.0),
+                Scaled(+07.0, +05.0),
+                Scaled(+10.0, +08.0),
+                Scaled(+13.0, +05.0));
 
             polygon = solution[2];
             polygon.OrderBottomLeftFirst();
             Assert.AreEqual(polygon.Orientation, PolygonOrientation.CounterClockwise);
-            Assert.AreEqual(4, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +04.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +05.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.0 * Scale, +06.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+09.0 * Scale, +05.0 * Scale) - polygon[3]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.0, +04.0),
+                Scaled(+11.0, +05.0),
+                Scaled(+10.0, +06.0),
+                Scaled(+09.0, +05.0));
         }
 
         [TestMethod]
@@ -3637,20 +3740,20 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+10.0, +06.0),
-                new DoublePoint(+05.0, +06.0),
-                new DoublePoint(+00.0, +00.0)
-            }.Select(p => new IntPoint(p * Scale)))
+                Scaled(+10.0, +06.0),
+                Scaled(+05.0, +06.0),
+                Scaled(+00.0, +00.0)
+            })
             {
                 IsClosed = false
             });
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+00.0, +03.0),
-                new DoublePoint(+09.0, +03.0),
-                new DoublePoint(+09.0, +05.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+00.0, +03.0),
+                Scaled(+09.0, +03.0),
+                Scaled(+09.0, +05.0)
+            }));
 
             var tree = new PolygonTree();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, tree));
@@ -3659,11 +3762,10 @@ namespace UnitTests
 
             // The solution should be a polygon with a single line segment.
             Assert.AreEqual(1, solution.Count);
-
-            var polygon = solution[0];
-            Assert.AreEqual(2, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+3.0681818 * Scale, +3.6818182 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+2.5 * Scale, +3.0 * Scale) - polygon[1]).Length));
+            AssertEqual(
+                solution[0],
+                Scaled(+3.0681818, +3.6818182),
+                Scaled(+2.5, +3.0));
         }
 
         [TestMethod]
@@ -3671,19 +3773,19 @@ namespace UnitTests
         {
             var subject = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+07.0, +07.0),
-                new DoublePoint(+11.0, +00.0),
-                new DoublePoint(+11.0, +14.0),
-                new DoublePoint(+14.0, +14.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+07.0, +07.0),
+                Scaled(+11.0, +00.0),
+                Scaled(+11.0, +14.0),
+                Scaled(+14.0, +14.0)
+            }));
 
             var clip = new PolygonPath(new Polygon(new[]
             {
-                new DoublePoint(+06.0, +01.0),
-                new DoublePoint(+15.0, +01.0),
-                new DoublePoint(+15.0, +13.0),
-                new DoublePoint(+06.0, +13.0)
-            }.Select(p => new IntPoint(p * Scale))));
+                Scaled(+06.0, +01.0),
+                Scaled(+15.0, +01.0),
+                Scaled(+15.0, +13.0),
+                Scaled(+06.0, +13.0)
+            }));
 
             var tree = new PolygonPath();
             Assert.IsTrue(new Clipper.Clipper().Execute(ClipOperation.Intersection, subject, clip, tree));
@@ -3695,14 +3797,15 @@ namespace UnitTests
             var polygon = solution[0];
             polygon.OrderBottomLeftFirst();
             Assert.AreEqual(polygon.Orientation, PolygonOrientation.CounterClockwise);
-            Assert.AreEqual(7, polygon.Count);
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+10.42857145 * Scale, +01.0 * Scale) - polygon[0]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +01.0 * Scale) - polygon[1]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +11.0 * Scale) - polygon[2]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+13.0 * Scale, +13.0 * Scale) - polygon[3]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +13.0 * Scale) - polygon[4]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+11.0 * Scale, +11.0 * Scale) - polygon[5]).Length));
-            Assert.IsTrue(GeometryHelper.NearZero((new IntPoint(+07.0 * Scale, +07.0 * Scale) - polygon[6]).Length));
+            AssertEqual(
+                polygon,
+                Scaled(+10.42857145, +01.0),
+                Scaled(+11.0, +01.0),
+                Scaled(+11.0, +11.0),
+                Scaled(+13.0, +13.0),
+                Scaled(+11.0, +13.0),
+                Scaled(+11.0, +11.0),
+                Scaled(+07.0, +07.0));
         }
 
         private static IList<DoublePoint> FromScaledPolygon(Polygon polygon)
@@ -3712,6 +3815,21 @@ namespace UnitTests
                     p.X * ScaleInverse,
                     p.Y * ScaleInverse))
                 .ToList();
+        }
+
+        private static PointL Scaled(double x, double y)
+        {
+            return new PointL((long) (x * Scale), (long) (y * Scale));
+        }
+
+        private static void AssertEqual(Polygon polygon, params PointL[] expected)
+        {
+            Assert.AreEqual(expected.Length, polygon.Count);
+
+            for (var i = 0; i < expected.Length; i++)
+            {
+                Assert.IsTrue(GeometryHelper.NearZero((expected[i] - polygon[i]).Length));
+            }
         }
     }
 }

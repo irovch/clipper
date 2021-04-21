@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
+using Clipper.Custom;
 
 namespace PerformanceTests
 {
@@ -131,18 +132,18 @@ namespace PerformanceTests
                     var subject = new Clipper.PolygonPath(
                         clipPath
                             .Subject
-                                .Select(poly => new Clipper.Polygon(poly.Select(pt =>
-                                    new Clipper.IntPoint(
-                                        pt.X * Scale,
-                                        pt.Y * Scale)))));
+                                .Select(poly => new Clipper.Polygon(poly.Count, poly.Select(pt =>
+                                    new PointL(
+                                        (long)(pt.X * Scale),
+                                        (long)(pt.Y * Scale))))));
 
                     var clip = new Clipper.PolygonPath(
                         clipPath
                             .Clip
-                                .Select(poly => new Clipper.Polygon(poly.Select(pt =>
-                                    new Clipper.IntPoint(
-                                        pt.X * Scale,
-                                        pt.Y * Scale)))));
+                                .Select(poly => new Clipper.Polygon(poly.Count, poly.Select(pt =>
+                                    new PointL(
+                                        (long)(pt.X * Scale),
+                                        (long)(pt.Y * Scale))))));
 
                     var solution = new Clipper.PolygonTree();
                     var clipper = new Clipper.Clipper();
