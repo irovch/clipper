@@ -6,5 +6,11 @@ namespace Clipper
     /// Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
     /// see http://glprogramming.com/red/chapter11.html
     /// </summary>
-    public enum PolygonFillType { EvenOdd, NonZero, Positive, Negative };
+    public enum PolygonFillType
+    {
+        EvenOdd,
+        NonZero,
+        Positive,
+        Negative
+    };
 }

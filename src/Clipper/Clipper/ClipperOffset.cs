@@ -264,7 +264,7 @@ namespace Clipper
                     node.EndType == EndType.ClosedPolygon)
                     _normals.Add(GetUnitNormal(_sourcePolygon[len - 1], _sourcePolygon[0]));
                 else
-                    _normals.Add(new DoublePoint(_normals[len - 2]));
+                    _normals.Add(_normals[len - 2]);
 
                 if (node.EndType == EndType.ClosedPolygon)
                 {
@@ -465,7 +465,6 @@ namespace Clipper
                     var outerNode = solution.Children[0];
                     solution.Children.Capacity = outerNode.Children.Count;
                     solution.Children[0] = outerNode.Children[0];
-                    solution.Children[0].Parent = solution;
                     for (var i = 1; i < outerNode.Children.Count; i++)
                     {
                         solution.AddChild(outerNode.Children[i]);

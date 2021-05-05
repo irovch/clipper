@@ -156,7 +156,7 @@ namespace Clipper
                     point.X == linePoint2.X && point.Y == linePoint2.Y ||
                     point.X > linePoint1.X == point.X < linePoint2.X &&
                     point.Y > linePoint1.Y == point.Y < linePoint2.Y &&
-                    Int128.Int128Mul(point.X - linePoint1.X, linePoint2.Y - linePoint1.Y) == Int128.Int128Mul(linePoint2.X - linePoint1.X, point.Y - linePoint1.Y);
+                    Int128.Int128MulEq(point.X - linePoint1.X, linePoint2.Y - linePoint1.Y, linePoint2.X - linePoint1.X, point.Y - linePoint1.Y);
             }
 
             return point.X == linePoint1.X && point.Y == linePoint1.Y ||
@@ -207,7 +207,7 @@ namespace Clipper
         {
             if (useFullRange)
             {
-                return Int128.Int128Mul(edge1.Delta.Y, edge2.Delta.X) == Int128.Int128Mul(edge1.Delta.X, edge2.Delta.Y);
+                return Int128.Int128MulEq(edge1.Delta.Y, edge2.Delta.X, edge1.Delta.X, edge2.Delta.Y);
             }
 
             return edge1.Delta.Y * edge2.Delta.X == edge1.Delta.X * edge2.Delta.Y;
@@ -223,8 +223,7 @@ namespace Clipper
             bool useFullRange)
         {
             if (useFullRange)
-                return Int128.Int128Mul(point1.Y - point2.Y, point2.X - point3.X) ==
-                       Int128.Int128Mul(point1.X - point2.X, point2.Y - point3.Y);
+                return Int128.Int128MulEq(point1.Y - point2.Y, point2.X - point3.X, point1.X - point2.X, point2.Y - point3.Y);
             return
                 (point1.Y - point2.Y) * (point2.X - point3.X) - (point1.X - point2.X) * (point2.Y - point3.Y) == 0;
         }
@@ -240,7 +239,7 @@ namespace Clipper
             bool useFullRange)
         {
             if (useFullRange)
-                return Int128.Int128Mul(point1.Y - point2.Y, point3.X - point4.X) == Int128.Int128Mul(point1.X - point2.X, point3.Y - point4.Y);
+                return Int128.Int128MulEq(point1.Y - point2.Y, point3.X - point4.X, point1.X - point2.X, point3.Y - point4.Y);
             return
                 (point1.Y - point2.Y) * (point3.X - point4.X) - (point1.X - point2.X) * (point3.Y - point4.Y) == 0;
         }

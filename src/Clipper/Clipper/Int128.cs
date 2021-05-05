@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.CompilerServices;
 
 namespace Clipper
@@ -10,128 +9,69 @@ namespace Clipper
     ///    Int128 val3 = val1 * val2;
     ///    val3.ToString => "85070591730234615847396907784232501249" (8.5e+37)
     /// </summary>
-    public readonly struct Int128
+    public static class Int128
     {
-        private readonly long _hi;
-        private readonly ulong _lo;
-
-        public Int128(in long hi, in ulong lo)
-        {
-            _lo = lo;
-            _hi = hi;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(in Int128 val1, in Int128 val2)
+        public static bool Int128MulEq(long lhs1, long rhs1, long lhs2, long rhs2)
         {
-            return val1._hi == val2._hi && val1._lo == val2._lo;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(in Int128 val1, in Int128 val2)
-        {
-            return val1._hi != val2._hi || val1._lo != val2._lo;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Int128 i128 && i128._hi == this._hi && i128._lo == this._lo;
-        }
-
-        public bool Equals(in Int128 other)
-        {
-            return this._hi == other._hi && this._lo == other._lo;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(this._hi, this._lo);
-        }
-
-        public static bool operator >(in Int128 val1, in Int128 val2)
-        {
-            if (val1._hi != val2._hi)
+            if (lhs1 == 0 || rhs1 == 0) return lhs2 == 0 || rhs2 == 0;
+            
+            var negate1 = lhs1 < 0 != rhs1 < 0;
+            var negate2 = lhs2 < 0 != rhs2 < 0;
+            if (negate1 != negate2)
             {
-                return val1._hi > val2._hi;
+                return false;
             }
+            
+            if (lhs1 < 0) lhs1 = -lhs1;
+            if (rhs1 < 0) rhs1 = -rhs1;
+            if (lhs2 < 0) lhs2 = -lhs2;
+            if (rhs2 < 0) rhs2 = -rhs2;
 
-            return val1._lo > val2._lo;
-        }
-
-        public static bool operator <(in Int128 val1, in Int128 val2)
-        {
-            if (val1._hi != val2._hi)
+            if (lhs1 == lhs2 && rhs1 == rhs2 || lhs1 == rhs2 && lhs2 == rhs1)
             {
-                return val1._hi < val2._hi;
+                return true;
             }
-
-            return val1._lo < val2._lo;
-        }
-
-        public static Int128 operator +(in Int128 lhs, in Int128 rhs)
-        {
-            var hi = lhs._hi + rhs._hi;
-            var lo = lhs._lo + rhs._lo;
-            if (lo < rhs._lo)
-            {
-                hi++;
-            }
-
-            return new Int128(hi, lo);
-        }
-
-        public static Int128 operator -(in Int128 lhs, in Int128 rhs)
-        {
-            return lhs + -rhs;
-        }
-
-        public static Int128 operator -(in Int128 val)
-        {
-            return val._lo == 0
-                ? new Int128(-val._hi, 0)
-                : new Int128(~val._hi, ~val._lo + 1);
-        }
-
-        public static explicit operator double(in Int128 val)
-        {
-            const double shift64 = 18446744073709551616.0; // 2^64
-
-            if (val._hi >= 0) return val._lo + val._hi * shift64;
-
-            if (val._lo == 0)
-            {
-                return val._hi * shift64;
-            }
-
-            return -(~val._lo + ~val._hi * shift64);
-        }
-
-        // nb: Constructing two new Int128 objects every time we want to multiply longs  
-        // is slow. So, although calling the Int128Mul method doesn't look as clean, the 
-        // code runs significantly faster than if we'd used the * operator.
-
-        public static Int128 Int128Mul(long lhs, long rhs)
-        {
-            var negate = lhs < 0 != rhs < 0;
-            if (lhs < 0) lhs = -lhs;
-            if (rhs < 0) rhs = -rhs;
-            var int1Hi = (ulong)lhs >> 32;
-            var int1Lo = (ulong)lhs & 0xFFFFFFFF;
-            var int2Hi = (ulong)rhs >> 32;
-            var int2Lo = (ulong)rhs & 0xFFFFFFFF;
-
+            
+            var int1Hi1 = (ulong)lhs1 >> 32;
+            var int1Lo1 = (ulong)lhs1 & 0xFFFFFFFF;
+            var int2Hi1 = (ulong)rhs1 >> 32;
+            var int2Lo1 = (ulong)rhs1 & 0xFFFFFFFF;
+            
+            var int1Hi2 = (ulong)lhs2 >> 32;
+            var int1Lo2 = (ulong)lhs2 & 0xFFFFFFFF;
+            var int2Hi2 = (ulong)rhs2 >> 32;
+            var int2Lo2 = (ulong)rhs2 & 0xFFFFFFFF;
+            
             // nb: see comments in clipper.pas
-            var a = int1Hi * int2Hi;
-            var b = int1Lo * int2Lo;
-            var c = int1Hi * int2Lo + int1Lo * int2Hi;
+            var b1 = int1Lo1 * int2Lo1;
+            var c1 = int1Hi1 * int2Lo1 + int1Lo1 * int2Hi1;
+            
+            ulong lo1;
+            unchecked { lo1 = (c1 << 32) + b1; }
+            
+            // nb: see comments in clipper.pas
+            var b2 = int1Lo2 * int2Lo2;
+            var c2 = int1Hi2 * int2Lo2 + int1Lo2 * int2Hi2;
+            
+            ulong lo2;
+            unchecked { lo2 = (c2 << 32) + b2; }
 
-            ulong lo;
-            var hi = (long)(a + (c >> 32));
+            if (lo1 != lo2)
+            {
+                return false;
+            }
+            
+            var a1 = int1Hi1 * int2Hi1;
+            var a2 = int1Hi2 * int2Hi2;
 
-            unchecked { lo = (c << 32) + b; }
-            if (lo < b) hi++;
-            var result = new Int128(hi, lo);
-            return negate ? -result : result;
+            var hi1 = (long)(a1 + (c1 >> 32));
+            if (lo1 < b1) hi1++;
+            
+            var hi2 = (long)(a2 + (c2 >> 32));
+            if (lo2 < b2) hi2++;
+
+            return hi1 == hi2;
         }
     };
 }
