@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AI.Geo;
 using Clipper;
-using Clipper.Custom;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTests
@@ -3828,7 +3828,7 @@ namespace UnitTests
 
             for (var i = 0; i < expected.Length; i++)
             {
-                Assert.IsTrue(GeometryHelper.NearZero((expected[i] - polygon[i]).Length));
+                Assert.IsTrue(expected[i] == polygon[i]);
             }
         }
     }

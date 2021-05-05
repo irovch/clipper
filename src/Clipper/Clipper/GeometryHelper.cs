@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Clipper.Custom;
+using AI.Geo;
 
 namespace Clipper
 {
@@ -50,17 +50,11 @@ namespace Clipper
             var rCross = 0;
             var lCross = 0;
 
-            // Shift so that 'point' is the origin. This destroys the polygon.
-            for (var i = 0; i < points.Count; i++)
-            {
-                points[i] -= point;
-            }
-
             // For each edge e = (i - 1, i), see if crosses rays.
             for (var i = 0; i < points.Count; i++)
             {
                 // (0, 0) is a vertex because we shifted to the origin.
-                if (Math.Abs(points[i].X) < Tolerance && Math.Abs(points[i].Y) < Tolerance)
+                if (points[i] == point)
                 {
                     return Containment.Vertex;
                 }
@@ -68,13 +62,13 @@ namespace Clipper
                 var i1 = (i + points.Count - 1) % points.Count;
 
                 // Check if e straddles x axis, with bias above/below.
-                var rStraddle = points[i].Y > 0 != points[i1].Y > 0;
-                var lStraddle = points[i].Y < 0 != points[i1].Y < 0;
+                var rStraddle = points[i].Y > point.Y != points[i1].Y > point.Y;
+                var lStraddle = points[i].Y < point.Y != points[i1].Y < point.Y;
 
                 if (!rStraddle && !lStraddle) continue;
 
                 // Compute intersection of e with x axis.
-                var x = (points[i].X * points[i1].Y - points[i1].X * points[i].Y) /
+                var x = ((points[i].X - point.X) * (points[i1].Y - point.Y) - (points[i1].X - point.X) * (points[i].Y - point.Y)) /
                         (points[i1].Y - points[i].Y);
 
                 if (rStraddle && x > 0) { rCross++; }
@@ -357,8 +351,10 @@ namespace Clipper
             // The dx field for a horizontal edge is simply the signed
             // length of the edge with the value of dx negative if the edge 
             // is oriented to the left.
-            var length = (point2 - point1).Length;
-            return point2.X > point1.X
+            var dx = point2.X - point1.X;
+            var dy = point2.Y - point1.Y;
+            var length = Math.Sqrt(dx * dx + dy * dy);
+            return dx > 0
                 ? +length
                 : -length;
         }

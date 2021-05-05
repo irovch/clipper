@@ -15,6 +15,7 @@ namespace Clipper
         public static bool Int128MulEq(long lhs1, long rhs1, long lhs2, long rhs2)
         {
             if (lhs1 == 0 || rhs1 == 0) return lhs2 == 0 || rhs2 == 0;
+            if (lhs2 == 0 || rhs2 == 0) return lhs1 == 0 || rhs1 == 0;
             
             var negate1 = lhs1 < 0 != rhs1 < 0;
             var negate2 = lhs2 < 0 != rhs2 < 0;

@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Visualizer", "Visualizer\Vi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsolePerformanceProfiler", "ConsolePerformanceProfiler\ConsolePerformanceProfiler.csproj", "{9638CAF4-87DA-4E31-A669-EB1C731BF1F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ai.utils", "..\..\..\airintel\dotnet\ai.utils\ai.utils.csproj", "{BBC2A9F9-455A-496E-BF04-DA4B0B949C10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ai.geo", "..\..\..\airintel\dotnet\ai.geo\ai.geo.csproj", "{E647DD89-38D4-4713-9CB7-CFA8B4A00E3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{9638CAF4-87DA-4E31-A669-EB1C731BF1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9638CAF4-87DA-4E31-A669-EB1C731BF1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9638CAF4-87DA-4E31-A669-EB1C731BF1F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBC2A9F9-455A-496E-BF04-DA4B0B949C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBC2A9F9-455A-496E-BF04-DA4B0B949C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBC2A9F9-455A-496E-BF04-DA4B0B949C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBC2A9F9-455A-496E-BF04-DA4B0B949C10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E647DD89-38D4-4713-9CB7-CFA8B4A00E3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E647DD89-38D4-4713-9CB7-CFA8B4A00E3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E647DD89-38D4-4713-9CB7-CFA8B4A00E3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E647DD89-38D4-4713-9CB7-CFA8B4A00E3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AI.Geo;
 using Clipper;
-using Clipper.Custom;
 
 namespace UnitTests
 {

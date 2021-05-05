@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
-using Clipper.Custom;
+using AI.Geo;
 
 namespace PerformanceTests
 {
